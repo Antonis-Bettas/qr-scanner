@@ -1,314 +1,1225 @@
 <!DOCTYPE html>
 <html lang="el">
+
 <head>
+
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0"
+  >
+
+  <meta name="theme-color" content="#ffffff">
 
   <title>QR Attendance</title>
 
   <script src="https://unpkg.com/html5-qrcode"></script>
 
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      max-width: 520px;
-      margin: 0 auto;
-      padding: 20px;
-      text-align: center;
-      background: #f5f5f5;
+
+    * {
+      box-sizing: border-box;
     }
+
+    body {
+      margin: 0;
+      padding: 20px;
+      min-height: 100vh;
+
+      font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Arial,
+        sans-serif;
+
+      background:
+        linear-gradient(
+          180deg,
+          #f6f8fb 0%,
+          #eef2f7 100%
+        );
+
+      color: #1f2937;
+    }
+
+
+    .app {
+
+      width: 100%;
+      max-width: 520px;
+
+      margin: 0 auto;
+
+    }
+
+
+    /* --------------------------------
+       HEADER
+    -------------------------------- */
+
+    .header {
+
+      text-align: center;
+
+      margin-bottom: 20px;
+
+    }
+
+
+    .header-icon {
+
+      width: 58px;
+      height: 58px;
+
+      margin: 0 auto 12px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      border-radius: 16px;
+
+      background: #111827;
+
+      color: white;
+
+      font-size: 29px;
+
+    }
+
+
+    h1 {
+
+      margin: 0;
+
+      font-size: 27px;
+      font-weight: 750;
+
+      letter-spacing: -0.5px;
+
+    }
+
+
+    .subtitle {
+
+      margin-top: 6px;
+
+      font-size: 14px;
+
+      color: #6b7280;
+
+    }
+
+
+    /* --------------------------------
+       MAIN CARD
+    -------------------------------- */
 
     .card {
+
       background: white;
+
+      border-radius: 20px;
+
       padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+
+      box-shadow:
+        0 10px 35px rgba(0, 0, 0, 0.08);
+
+      border: 1px solid #e8ebef;
+
     }
 
-    h2 {
-      margin-top: 0;
+
+    /* --------------------------------
+       DEVICE
+    -------------------------------- */
+
+    .field-label {
+
+      display: block;
+
+      text-align: left;
+
+      margin-bottom: 7px;
+
+      font-size: 13px;
+      font-weight: 700;
+
+      color: #4b5563;
+
     }
+
+
+    #device {
+
+      width: 100%;
+
+      padding: 13px 15px;
+
+      font-size: 16px;
+
+      border-radius: 11px;
+
+      border: 1px solid #d1d5db;
+
+      outline: none;
+
+      background: #f9fafb;
+
+      margin-bottom: 18px;
+
+    }
+
+
+    #device:focus {
+
+      border-color: #6b7280;
+
+      background: white;
+
+    }
+
+
+    /* --------------------------------
+       CAMERA
+    -------------------------------- */
+
+    .camera-wrapper {
+
+      position: relative;
+
+      width: 100%;
+
+      overflow: hidden;
+
+      border-radius: 16px;
+
+      background: #111827;
+
+      min-height: 260px;
+
+      display: flex;
+
+      align-items: center;
+      justify-content: center;
+
+    }
+
 
     #reader {
+
       width: 100%;
-      margin-top: 20px;
+
+      overflow: hidden;
+
     }
 
-    input {
-      width: 90%;
-      padding: 12px;
-      font-size: 18px;
-      margin: 10px 0;
-      border: 1px solid #ccc;
-      border-radius: 8px;
+
+    #reader video {
+
+      width: 100% !important;
+
+      border-radius: 16px;
+
     }
+
+
+    .camera-placeholder {
+
+      position: absolute;
+
+      inset: 0;
+
+      display: flex;
+
+      flex-direction: column;
+
+      align-items: center;
+      justify-content: center;
+
+      color: #d1d5db;
+
+      pointer-events: none;
+
+    }
+
+
+    .camera-placeholder-icon {
+
+      font-size: 38px;
+
+      margin-bottom: 10px;
+
+    }
+
+
+    .camera-placeholder-text {
+
+      font-size: 14px;
+
+    }
+
+
+    /* Scan guide */
+
+    .scan-frame {
+
+      position: absolute;
+
+      width: 210px;
+      height: 210px;
+
+      border: 3px solid rgba(255,255,255,0.9);
+
+      border-radius: 18px;
+
+      pointer-events: none;
+
+      display: none;
+
+      box-shadow:
+        0 0 0 1000px rgba(0,0,0,0.12);
+
+    }
+
+
+    /* --------------------------------
+       BUTTONS
+    -------------------------------- */
+
+    .button {
+
+      width: 100%;
+
+      margin-top: 18px;
+
+      padding: 15px 18px;
+
+      border: none;
+
+      border-radius: 13px;
+
+      font-size: 17px;
+      font-weight: 750;
+
+      cursor: pointer;
+
+      transition:
+        transform 0.08s ease,
+        opacity 0.2s ease;
+
+    }
+
+
+    .button:active {
+
+      transform: scale(0.98);
+
+    }
+
+
+    .button-primary {
+
+      background: #111827;
+
+      color: white;
+
+    }
+
+
+    .button-success {
+
+      background: #15803d;
+
+      color: white;
+
+    }
+
+
+    .button:disabled {
+
+      opacity: 0.5;
+
+      cursor: default;
+
+    }
+
+
+    /* --------------------------------
+       RESULT
+    -------------------------------- */
 
     #result {
-      margin-top: 20px;
-      padding: 20px;
+
+      margin-top: 18px;
+
+      padding: 17px;
+
+      border-radius: 14px;
+
+      text-align: center;
+
+      background: #f3f4f6;
+
+      color: #4b5563;
+
+      min-height: 70px;
+
+      display: flex;
+
+      flex-direction: column;
+
+      justify-content: center;
+
+    }
+
+
+    .result-title {
+
+      font-size: 21px;
+
+      font-weight: 800;
+
+      margin-bottom: 8px;
+
+    }
+
+
+    .result-name {
+
       font-size: 20px;
-      font-weight: bold;
-      border-radius: 10px;
-      background: #eee;
+
+      font-weight: 700;
+
+      margin-top: 5px;
+
     }
 
-    .success {
-      background: #dff5e1 !important;
-      color: #146c2e;
+
+    .result-code {
+
+      font-size: 14px;
+
+      margin-top: 4px;
+
+      opacity: 0.8;
+
     }
 
-    .error {
-      background: #fde2e2 !important;
-      color: #a40000;
+
+    .result-time {
+
+      font-size: 15px;
+
+      margin-top: 10px;
+
+      font-weight: 600;
+
     }
 
-    .warning {
-      background: #fff4ce !important;
-      color: #8a6400;
+
+    .status-waiting {
+
+      background: #f3f4f6 !important;
+
+      color: #4b5563 !important;
+
     }
+
+
+    .status-loading {
+
+      background: #eff6ff !important;
+
+      color: #1d4ed8 !important;
+
+    }
+
+
+    .status-success {
+
+      background: #dcfce7 !important;
+
+      color: #166534 !important;
+
+    }
+
+
+    .status-warning {
+
+      background: #fef3c7 !important;
+
+      color: #92400e !important;
+
+    }
+
+
+    .status-error {
+
+      background: #fee2e2 !important;
+
+      color: #991b1b !important;
+
+    }
+
+
+    /* --------------------------------
+       FOOTER LOGO
+    -------------------------------- */
+
+    .footer {
+
+      text-align: center;
+
+      margin-top: 28px;
+
+      padding-bottom: 15px;
+
+    }
+
+
+    .footer-text {
+
+      font-size: 11px;
+
+      color: #9ca3af;
+
+      margin-bottom: 12px;
+
+      text-transform: uppercase;
+
+      letter-spacing: 1px;
+
+    }
+
+
+    .footer-logo {
+
+      display: block;
+
+      margin: 0 auto;
+
+      max-width: 180px;
+
+      width: 55%;
+
+      height: auto;
+
+    }
+
+
+    /* --------------------------------
+       MOBILE
+    -------------------------------- */
+
+    @media (max-width: 480px) {
+
+      body {
+
+        padding: 14px;
+
+      }
+
+      .card {
+
+        padding: 16px;
+
+      }
+
+      h1 {
+
+        font-size: 24px;
+
+      }
+
+      .camera-wrapper {
+
+        min-height: 240px;
+
+      }
+
+    }
+
   </style>
+
 </head>
+
 
 <body>
 
-<div class="card">
 
-  <h2>QR Attendance</h2>
+<div class="app">
 
-  <input
-    type="text"
-    id="device"
-    value="ENTRY-1"
-    placeholder="π.χ. ENTRY-1"
-  >
 
-  <div id="reader"></div>
+  <!-- HEADER -->
 
-  <div id="result">
-    Περιμένω scan...
+  <div class="header">
+
+    <div class="header-icon">
+      ▣
+    </div>
+
+    <h1>
+      QR Attendance
+    </h1>
+
+    <div class="subtitle">
+      Σύστημα καταγραφής παρουσίας
+    </div>
+
   </div>
+
+
+
+  <!-- MAIN CARD -->
+
+  <div class="card">
+
+
+    <label
+      class="field-label"
+      for="device"
+    >
+      Σημείο εισόδου
+    </label>
+
+
+    <input
+      type="text"
+      id="device"
+      value="ENTRY-1"
+      placeholder="π.χ. ENTRY-1"
+    >
+
+
+
+    <!-- CAMERA -->
+
+    <div class="camera-wrapper">
+
+      <div id="reader"></div>
+
+
+      <div
+        id="cameraPlaceholder"
+        class="camera-placeholder"
+      >
+
+        <div class="camera-placeholder-icon">
+          📷
+        </div>
+
+        <div class="camera-placeholder-text">
+          Η κάμερα δεν έχει ξεκινήσει
+        </div>
+
+      </div>
+
+
+      <div
+        id="scanFrame"
+        class="scan-frame"
+      ></div>
+
+    </div>
+
+
+
+    <!-- START BUTTON -->
+
+    <button
+      id="startButton"
+      class="button button-primary"
+      onclick="startScanner()"
+    >
+      ΕΝΑΡΞΗ SCANNING
+    </button>
+
+
+
+    <!-- RESULT -->
+
+    <div
+      id="result"
+      class="status-waiting"
+    >
+
+      Πατήστε «Έναρξη Scanning»
+
+    </div>
+
+
+
+    <!-- NEXT BUTTON -->
+
+    <button
+      id="nextButton"
+      class="button button-success"
+      onclick="newScan()"
+      style="display:none;"
+    >
+      ✓ OK — ΝΕΟ SCAN
+    </button>
+
+
+  </div>
+
+
+
+  <!-- FOOTER -->
+
+  <div class="footer">
+
+    <div class="footer-text">
+      Powered by
+    </div>
+
+    <img
+      src="zoom_logo_210426.png"
+      alt="Zoom"
+      class="footer-logo"
+    >
+
+  </div>
+
 
 </div>
 
+
+
 <script>
 
-const API_URL = "https://script.google.com/macros/s/AKfycbyC59O-fK7_ZPfJ11l1qKKEaLQeccAAeGIt1MaWLHb6ILjdHdfE67zcBnksrnkLS0zZzQ/exec";
 
-let scanner = null;
-let scannerStopped = false;
+// ==========================================
+// ΡΥΘΜΙΣΕΙΣ
+// ==========================================
+
+const API_URL =
+  "https://script.google.com/macros/s/AKfycbyC59O-fK7_ZPfJ11l1qKKEaLQeccAAeGIt1MaWLHb6ILjdHdfE67zcBnksrnkLS0zZzQ/exec";
 
 
-// -------------------------
-// ΕΝΑΡΞΗ SCANNER
-// -------------------------
+let html5QrCode = null;
 
-function startScanner() {
+let cameraId = null;
 
-  scannerStopped = false;
+let scannerRunning = false;
 
-  const result = document.getElementById("result");
+let scanLocked = false;
 
-  result.className = "";
-  result.innerHTML = "Περιμένω scan...";
 
-  scanner = new Html5QrcodeScanner(
-    "reader",
-    {
-      fps: 10,
-      qrbox: {
-        width: 250,
-        height: 250
-      }
-    },
-    false
+
+// ==========================================
+// ΒΡΕΣ ΑΥΤΟΜΑΤΑ CAMERA 0
+// ==========================================
+
+async function getCamera() {
+
+  if (cameraId) {
+    return cameraId;
+  }
+
+
+  const cameras =
+    await Html5Qrcode.getCameras();
+
+
+  if (!cameras || cameras.length === 0) {
+
+    throw new Error(
+      "Δεν βρέθηκε διαθέσιμη κάμερα."
+    );
+
+  }
+
+
+  // CAMERA 0
+  cameraId = cameras[0].id;
+
+
+  console.log(
+    "Camera selected:",
+    cameras[0].label,
+    cameraId
   );
 
-  scanner.render(
-    onScanSuccess,
-    function(error) {
-      // Αγνοούμε τα errors όσο ψάχνει QR
-    }
-  );
+
+  return cameraId;
+
 }
 
 
-// -------------------------
-// ΟΤΑΝ ΒΡΕΙ QR
-// -------------------------
 
-function onScanSuccess(decodedText) {
+// ==========================================
+// ΕΝΑΡΞΗ SCANNER
+// ==========================================
 
-  if (scannerStopped) {
+async function startScanner() {
+
+
+  if (scannerRunning) {
     return;
   }
 
-  scannerStopped = true;
 
-  const code = decodedText.trim();
+  scanLocked = false;
 
-  const device =
-    document.getElementById("device").value.trim() || "UNKNOWN";
+
+  const startButton =
+    document.getElementById("startButton");
+
+  const nextButton =
+    document.getElementById("nextButton");
 
   const result =
     document.getElementById("result");
 
-  result.className = "";
-  result.innerHTML = "Καταχώρηση...";
+  const placeholder =
+    document.getElementById("cameraPlaceholder");
 
-  // Σταματάμε τον scanner
-  scanner.clear().then(function() {
-
-    saveScan(code, device);
-
-  }).catch(function(error) {
-
-    saveScan(code, device);
-
-  });
-}
+  const scanFrame =
+    document.getElementById("scanFrame");
 
 
-// -------------------------
-// ΑΠΟΣΤΟΛΗ ΣΤΟ GOOGLE SHEET
-// -------------------------
+  startButton.disabled = true;
 
-function saveScan(code, device) {
-
-  const callbackName = "cb" + Date.now();
-
-  const script = document.createElement("script");
+  startButton.innerHTML =
+    "ΕΝΑΡΞΗ ΚΑΜΕΡΑΣ...";
 
 
-  window[callbackName] = function(response) {
-
-    const result =
-      document.getElementById("result");
+  nextButton.style.display =
+    "none";
 
 
-    if (response.success) {
+  result.className =
+    "status-loading";
 
-      if (response.found) {
+  result.innerHTML =
+    "Εκκίνηση κάμερας...";
 
-        result.className = "success";
 
-        result.innerHTML =
-          "✓ ΚΑΤΑΓΡΑΦΗΚΕ" +
-          "<br><br>" +
-          response.name +
-          "<br>" +
-          response.code +
-          "<br><br>" +
-          response.timestamp +
-          "<br><br>" +
-          '<button onclick="newScan()" style="' +
-          'padding:14px 28px;' +
-          'font-size:20px;' +
-          'font-weight:bold;' +
-          'border:none;' +
-          'border-radius:8px;' +
-          'cursor:pointer;' +
-          '">ΝΕΟ SCAN</button>';
+  try {
 
-      } else {
 
-        result.className = "warning";
+    const selectedCamera =
+      await getCamera();
 
-        result.innerHTML =
-          "⚠ ΑΓΝΩΣΤΟ QR" +
-          "<br><br>" +
-          response.code +
-          "<br><br>" +
-          response.timestamp +
-          "<br><br>" +
-          '<button onclick="newScan()" style="' +
-          'padding:14px 28px;' +
-          'font-size:20px;' +
-          'font-weight:bold;' +
-          'border:none;' +
-          'border-radius:8px;' +
-          'cursor:pointer;' +
-          '">ΝΕΟ SCAN</button>';
-      }
 
-    } else {
+    if (!html5QrCode) {
 
-      result.className = "error";
+      html5QrCode =
+        new Html5Qrcode("reader");
 
-      result.innerHTML =
-        "Σφάλμα:<br>" +
-        response.message +
-        "<br><br>" +
-        '<button onclick="newScan()" style="' +
-        'padding:14px 28px;' +
-        'font-size:20px;' +
-        'font-weight:bold;' +
-        'border:none;' +
-        'border-radius:8px;' +
-        'cursor:pointer;' +
-        '">ΝΕΟ SCAN</button>';
     }
 
 
-    script.remove();
-    delete window[callbackName];
-  };
+    await html5QrCode.start(
+
+      selectedCamera,
+
+      {
+
+        fps: 10,
+
+        qrbox: {
+          width: 220,
+          height: 220
+        }
+
+      },
+
+      onScanSuccess,
+
+      function() {
+        // Αγνοούμε όσο ψάχνει QR
+      }
+
+    );
 
 
-  script.onerror = function() {
+    scannerRunning = true;
 
-    const result =
-      document.getElementById("result");
 
-    result.className = "error";
+    placeholder.style.display =
+      "none";
+
+
+    scanFrame.style.display =
+      "block";
+
+
+    startButton.style.display =
+      "none";
+
+
+    result.className =
+      "status-waiting";
+
 
     result.innerHTML =
-      "Σφάλμα επικοινωνίας με το Google Sheet" +
-      "<br><br>" +
-      '<button onclick="newScan()" style="' +
-      'padding:14px 28px;' +
-      'font-size:20px;' +
-      'font-weight:bold;' +
-      'border:none;' +
-      'border-radius:8px;' +
-      'cursor:pointer;' +
-      '">ΝΕΟ SCAN</button>';
+      "Σκανάρετε το QR του επισκέπτη";
 
-    script.remove();
-    delete window[callbackName];
-  };
+
+  }
+  catch (error) {
+
+
+    console.error(error);
+
+
+    result.className =
+      "status-error";
+
+
+    result.innerHTML =
+      "<div class='result-title'>Σφάλμα κάμερας</div>" +
+      error.message;
+
+
+    startButton.disabled =
+      false;
+
+
+    startButton.style.display =
+      "block";
+
+
+    startButton.innerHTML =
+      "ΔΟΚΙΜΑΣΤΕ ΞΑΝΑ";
+
+  }
+
+}
+
+
+
+// ==========================================
+// QR FOUND
+// ==========================================
+
+async function onScanSuccess(decodedText) {
+
+
+  if (scanLocked) {
+    return;
+  }
+
+
+  scanLocked = true;
+
+
+  const code =
+    decodedText.trim();
+
+
+  const device =
+    document
+      .getElementById("device")
+      .value
+      .trim()
+      || "UNKNOWN";
+
+
+  const result =
+    document.getElementById("result");
+
+
+  const scanFrame =
+    document.getElementById("scanFrame");
+
+
+  result.className =
+    "status-loading";
+
+
+  result.innerHTML =
+    "<div class='result-title'>QR ΕΝΤΟΠΙΣΤΗΚΕ</div>" +
+    "Καταχώρηση στο Google Sheet...";
+
+
+  scanFrame.style.display =
+    "none";
+
+
+  // Σταματάμε την κάμερα
+  // πριν στείλουμε την εγγραφή
+
+  try {
+
+    await html5QrCode.stop();
+
+  }
+  catch (error) {
+
+    console.log(
+      "Scanner stop:",
+      error
+    );
+
+  }
+
+
+  scannerRunning = false;
+
+
+  saveScan(
+    code,
+    device
+  );
+
+}
+
+
+
+// ==========================================
+// SAVE TO GOOGLE SHEET
+// ==========================================
+
+function saveScan(code, device) {
+
+
+  const callbackName =
+    "cb" + Date.now();
+
+
+  const script =
+    document.createElement("script");
+
+
+
+  window[callbackName] =
+    function(response) {
+
+
+      const result =
+        document.getElementById("result");
+
+
+      const nextButton =
+        document.getElementById("nextButton");
+
+
+
+      if (response.success) {
+
+
+        if (response.found) {
+
+
+          result.className =
+            "status-success";
+
+
+          result.innerHTML =
+
+            "<div class='result-title'>" +
+            "✓ ΚΑΤΑΓΡΑΦΗΚΕ" +
+            "</div>" +
+
+            "<div class='result-name'>" +
+            escapeHtml(response.name) +
+            "</div>" +
+
+            "<div class='result-code'>" +
+            escapeHtml(response.code) +
+            "</div>" +
+
+            "<div class='result-time'>" +
+            escapeHtml(response.timestamp) +
+            "</div>";
+
+
+        }
+        else {
+
+
+          result.className =
+            "status-warning";
+
+
+          result.innerHTML =
+
+            "<div class='result-title'>" +
+            "⚠ ΑΓΝΩΣΤΟ QR" +
+            "</div>" +
+
+            "<div class='result-code'>" +
+            escapeHtml(response.code) +
+            "</div>" +
+
+            "<div class='result-time'>" +
+            escapeHtml(response.timestamp) +
+            "</div>";
+
+        }
+
+
+      }
+      else {
+
+
+        result.className =
+          "status-error";
+
+
+        result.innerHTML =
+
+          "<div class='result-title'>" +
+          "ΣΦΑΛΜΑ" +
+          "</div>" +
+
+          escapeHtml(
+            response.message
+          );
+
+      }
+
+
+
+      nextButton.style.display =
+        "block";
+
+
+      script.remove();
+
+
+      delete window[callbackName];
+
+    };
+
+
+
+  script.onerror =
+    function() {
+
+
+      const result =
+        document.getElementById("result");
+
+
+      const nextButton =
+        document.getElementById("nextButton");
+
+
+      result.className =
+        "status-error";
+
+
+      result.innerHTML =
+
+        "<div class='result-title'>" +
+        "ΣΦΑΛΜΑ ΕΠΙΚΟΙΝΩΝΙΑΣ" +
+        "</div>" +
+
+        "Δεν ήταν δυνατή η επικοινωνία με το Google Sheet.";
+
+
+      nextButton.style.display =
+        "block";
+
+
+      script.remove();
+
+
+      delete window[callbackName];
+
+    };
+
 
 
   script.src =
+
     API_URL +
+
     "?action=scan" +
-    "&code=" + encodeURIComponent(code) +
-    "&device=" + encodeURIComponent(device) +
-    "&callback=" + encodeURIComponent(callbackName);
+
+    "&code=" +
+    encodeURIComponent(code) +
+
+    "&device=" +
+    encodeURIComponent(device) +
+
+    "&callback=" +
+    encodeURIComponent(callbackName);
 
 
-  document.body.appendChild(script);
+
+  document.body.appendChild(
+    script
+  );
+
 }
 
 
-// -------------------------
+
+// ==========================================
 // ΝΕΟ SCAN
-// -------------------------
+// ==========================================
 
 function newScan() {
 
-  document.getElementById("reader").innerHTML = "";
+
+  const nextButton =
+    document.getElementById("nextButton");
+
+
+  nextButton.style.display =
+    "none";
+
+
+  scanLocked =
+    false;
+
 
   startScanner();
+
 }
 
 
-// -------------------------
-// ΠΡΩΤΗ ΕΝΑΡΞΗ
-// -------------------------
 
-startScanner();
+// ==========================================
+// ΑΣΦΑΛΗΣ ΕΜΦΑΝΙΣΗ ΚΕΙΜΕΝΟΥ
+// ==========================================
+
+function escapeHtml(value) {
+
+
+  return String(value ?? "")
+
+    .replaceAll(
+      "&",
+      "&amp;"
+    )
+
+    .replaceAll(
+      "<",
+      "&lt;"
+    )
+
+    .replaceAll(
+      ">",
+      "&gt;"
+    )
+
+    .replaceAll(
+      '"',
+      "&quot;"
+    )
+
+    .replaceAll(
+      "'",
+      "&#039;"
+    );
+
+}
+
 
 </script>
 
+
 </body>
+
 </html>
