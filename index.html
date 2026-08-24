@@ -94,29 +94,57 @@
 
 const API_URL = "https://script.google.com/macros/s/AKfycbyC59O-fK7_ZPfJ11l1qKKEaLQeccAAeGIt1MaWLHb6ILjdHdfE67zcBnksrnkLS0zZzQ/exec";
 
-let lastCode = "";
-let lastScanTime = 0;
+let scanner = null;
+let scannerStopped = false;
 
 
 // -------------------------
-// QR SCAN
+// ΕΝΑΡΞΗ SCANNER
+// -------------------------
+
+function startScanner() {
+
+  scannerStopped = false;
+
+  const result = document.getElementById("result");
+
+  result.className = "";
+  result.innerHTML = "Περιμένω scan...";
+
+  scanner = new Html5QrcodeScanner(
+    "reader",
+    {
+      fps: 10,
+      qrbox: {
+        width: 250,
+        height: 250
+      }
+    },
+    false
+  );
+
+  scanner.render(
+    onScanSuccess,
+    function(error) {
+      // Αγνοούμε τα errors όσο ψάχνει QR
+    }
+  );
+}
+
+
+// -------------------------
+// ΟΤΑΝ ΒΡΕΙ QR
 // -------------------------
 
 function onScanSuccess(decodedText) {
 
-  const code = decodedText.trim();
-  const now = Date.now();
-
-  // Προστασία από συνεχόμενο scan του ίδιου QR
-  if (
-    code === lastCode &&
-    now - lastScanTime < 2000
-  ) {
+  if (scannerStopped) {
     return;
   }
 
-  lastCode = code;
-  lastScanTime = now;
+  scannerStopped = true;
+
+  const code = decodedText.trim();
 
   const device =
     document.getElementById("device").value.trim() || "UNKNOWN";
@@ -127,7 +155,16 @@ function onScanSuccess(decodedText) {
   result.className = "";
   result.innerHTML = "Καταχώρηση...";
 
-  saveScan(code, device);
+  // Σταματάμε τον scanner
+  scanner.clear().then(function() {
+
+    saveScan(code, device);
+
+  }).catch(function(error) {
+
+    saveScan(code, device);
+
+  });
 }
 
 
@@ -161,7 +198,16 @@ function saveScan(code, device) {
           "<br>" +
           response.code +
           "<br><br>" +
-          response.timestamp;
+          response.timestamp +
+          "<br><br>" +
+          '<button onclick="newScan()" style="' +
+          'padding:14px 28px;' +
+          'font-size:20px;' +
+          'font-weight:bold;' +
+          'border:none;' +
+          'border-radius:8px;' +
+          'cursor:pointer;' +
+          '">OK - ΝΕΟ SCAN</button>';
 
       } else {
 
@@ -172,7 +218,16 @@ function saveScan(code, device) {
           "<br><br>" +
           response.code +
           "<br><br>" +
-          response.timestamp;
+          response.timestamp +
+          "<br><br>" +
+          '<button onclick="newScan()" style="' +
+          'padding:14px 28px;' +
+          'font-size:20px;' +
+          'font-weight:bold;' +
+          'border:none;' +
+          'border-radius:8px;' +
+          'cursor:pointer;' +
+          '">OK - ΝΕΟ SCAN</button>';
       }
 
     } else {
@@ -181,7 +236,16 @@ function saveScan(code, device) {
 
       result.innerHTML =
         "Σφάλμα:<br>" +
-        response.message;
+        response.message +
+        "<br><br>" +
+        '<button onclick="newScan()" style="' +
+        'padding:14px 28px;' +
+        'font-size:20px;' +
+        'font-weight:bold;' +
+        'border:none;' +
+        'border-radius:8px;' +
+        'cursor:pointer;' +
+        '">OK - ΝΕΟ SCAN</button>';
     }
 
 
@@ -198,7 +262,16 @@ function saveScan(code, device) {
     result.className = "error";
 
     result.innerHTML =
-      "Σφάλμα επικοινωνίας με το Google Sheet";
+      "Σφάλμα επικοινωνίας με το Google Sheet" +
+      "<br><br>" +
+      '<button onclick="newScan()" style="' +
+      'padding:14px 28px;' +
+      'font-size:20px;' +
+      'font-weight:bold;' +
+      'border:none;' +
+      'border-radius:8px;' +
+      'cursor:pointer;' +
+      '">OK - ΝΕΟ SCAN</button>';
 
     script.remove();
     delete window[callbackName];
@@ -218,29 +291,22 @@ function saveScan(code, device) {
 
 
 // -------------------------
-// QR READER
+// ΝΕΟ SCAN
 // -------------------------
 
-const scanner =
-  new Html5QrcodeScanner(
-    "reader",
-    {
-      fps: 10,
-      qrbox: {
-        width: 250,
-        height: 250
-      }
-    },
-    false
-  );
+function newScan() {
+
+  document.getElementById("reader").innerHTML = "";
+
+  startScanner();
+}
 
 
-scanner.render(
-  onScanSuccess,
-  function(error) {
-    // Αγνοούμε τα errors όσο ψάχνει QR
-  }
-);
+// -------------------------
+// ΠΡΩΤΗ ΕΝΑΡΞΗ
+// -------------------------
+
+startScanner();
 
 </script>
 
