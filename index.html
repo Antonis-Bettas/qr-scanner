@@ -92,7 +92,7 @@
 
 <script>
 
-const API_URL = "1ks2ARPPXo-bjYRajbR_ekFackbZp03hQgTenUGRE43I";
+const API_URL = "https://script.google.com/macros/s/AKfycbyC59O-fK7_ZPfJ11l1qKKEaLQeccAAeGIt1MaWLHb6ILjdHdfE67zcBnksrnkLS0zZzQ/exec";
 
 let lastCode = "";
 let lastScanTime = 0;
@@ -107,7 +107,7 @@ function onScanSuccess(decodedText) {
   const code = decodedText.trim();
   const now = Date.now();
 
-  // Προστασία από συνεχόμενα scans του ίδιου QR
+  // Προστασία από συνεχόμενο scan του ίδιου QR
   if (
     code === lastCode &&
     now - lastScanTime < 2000
@@ -133,23 +133,13 @@ function onScanSuccess(decodedText) {
 
 // -------------------------
 // ΑΠΟΣΤΟΛΗ ΣΤΟ GOOGLE SHEET
-// JSONP
 // -------------------------
 
 function saveScan(code, device) {
 
-  const callbackName =
-    "callback_" + Date.now();
+  const callbackName = "cb" + Date.now();
 
-  const script =
-    document.createElement("script");
-
-  const url =
-    API_URL +
-    "?action=scan" +
-    "&code=" + encodeURIComponent(code) +
-    "&device=" + encodeURIComponent(device) +
-    "&callback=" + callbackName;
+  const script = document.createElement("script");
 
 
   window[callbackName] = function(response) {
@@ -195,8 +185,7 @@ function saveScan(code, device) {
     }
 
 
-    document.body.removeChild(script);
-
+    script.remove();
     delete window[callbackName];
   };
 
@@ -211,11 +200,18 @@ function saveScan(code, device) {
     result.innerHTML =
       "Σφάλμα επικοινωνίας με το Google Sheet";
 
+    script.remove();
     delete window[callbackName];
   };
 
 
-  script.src = url;
+  script.src =
+    API_URL +
+    "?action=scan" +
+    "&code=" + encodeURIComponent(code) +
+    "&device=" + encodeURIComponent(device) +
+    "&callback=" + encodeURIComponent(callbackName);
+
 
   document.body.appendChild(script);
 }
@@ -238,10 +234,11 @@ const scanner =
     false
   );
 
+
 scanner.render(
   onScanSuccess,
   function(error) {
-    // Δεν κάνουμε τίποτα όσο ψάχνει QR
+    // Αγνοούμε τα errors όσο ψάχνει QR
   }
 );
 
