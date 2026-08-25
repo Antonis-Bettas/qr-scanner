@@ -557,53 +557,52 @@ async function drawFront(canvas, person) {
 
 
   // COMPANY
+// COMPANY
 
-  if (person.company) {
+if (person.company) {
 
-    y += 35;
+  y += 40;
 
-    ctx.fillStyle =
-      "#4b5563";
+  // Πιο σκούρο χρώμα
+  ctx.fillStyle = "#111827";
 
+  // Μεγαλύτερη γραμματοσειρά
+  const companySize =
+    fitText(
+      ctx,
+      person.company,
+      760,
+      44,   // αρχικό μέγεθος
+      30,   // ελάχιστο μέγεθος
+      700   // bold
+    );
 
-    const companySize =
-      fitText(
-        ctx,
-        person.company,
-        700,
-        36,
-        24,
-        500
-      );
+  ctx.font =
+    "700 " +
+    companySize +
+    "px Arial, sans-serif";
 
+  const companyLines =
+    wrapText(
+      ctx,
+      person.company,
+      760
+    ).slice(0,2);
 
-    ctx.font =
-      "500 " +
-      companySize +
-      "px Arial, sans-serif";
+  for (const line of companyLines) {
 
+    ctx.fillText(
+      line,
+      W / 2,
+      y
+    );
 
-    const companyLines =
-      wrapText(
-        ctx,
-        person.company,
-        700
-      ).slice(0,2);
-
-
-    for (const line of companyLines) {
-
-      ctx.fillText(
-        line,
-        W / 2,
-        y
-      );
-
-      y +=
-        companySize * 1.25;
-    }
-
+    y +=
+      companySize * 1.20;
   }
+
+}
+  
 
 }
 
