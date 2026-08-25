@@ -329,6 +329,36 @@ function createQrDataUrl(code) {
   return qr.createDataURL(10, 3);
 }
 
+  function rotateCanvas180(sourceCanvas) {
+
+  const rotated =
+    document.createElement("canvas");
+
+  rotated.width =
+    sourceCanvas.width;
+
+  rotated.height =
+    sourceCanvas.height;
+
+  const ctx =
+    rotated.getContext("2d");
+
+  ctx.translate(
+    rotated.width,
+    rotated.height
+  );
+
+  ctx.rotate(Math.PI);
+
+  ctx.drawImage(
+    sourceCanvas,
+    0,
+    0
+  );
+
+  return rotated;
+}
+
 async function drawBack(canvas, person) {
   const ctx = canvas.getContext("2d");
   const W = canvas.width, H = canvas.height;
@@ -455,7 +485,10 @@ function slotForIndex(localIndex, mode, isBack) {
 }
 
 async function addA4Side(pdf, people, side, mode, addPageFirst) {
-  if (addPageFirst) pdf.addPage("a4", "landscape");
+
+  if (addPageFirst) {
+    pdf.addPage("a4", "landscape");
+  }
 
   const pageW = 297;
   const pageH = 210;
@@ -463,48 +496,69 @@ async function addA4Side(pdf, people, side, mode, addPageFirst) {
   const cardH = 60;
 
   // 3×3 = 270×180
-  const startX = (pageW - cardW*3)/2; // 13.5mm
-  const startY = (pageH - cardH*3)/2; // 15mm
+  const startX = (pageW - cardW * 3) / 2;
+  const startY = (pageH - cardH * 3) / 2;
 
-  for (let i=0; i<people.length; i++) {
-    const {row, col} = slotForIndex(i, mode, side === "back");
-    const x = startX + col*cardW;
-    const y = startY + row*cardH;
+  for (let i = 0; i < people.length; i++) {
 
-    const canvas = await makeBadgeCanvas(people[i], side);
+    const { row, col } =
+      slotForIndex(
+        i,
+        mode,
+        side === "back"
+      );
 
-const imgData = canvas.toDataURL("image/jpeg", .94);
+    const x =
+      startX + col * cardW;
 
-if (side === "back" && mode === "mirrorY") {
+    const y =
+      startY + row * cardH;
 
-  pdf.addImage(
-    imgData,
-    "JPEG",
-    x,
-    y,
-    cardW,
-    cardH,
-    undefined,
-    "FAST",
-    180
-  );
 
-} else {
+    let canvas =
+      await makeBadgeCanvas(
+        people[i],
+        side
+      );
 
-  pdf.addImage(
-    imgData,
-    "JPEG",
-    x,
-    y,
-    cardW,
-    cardH,
-    undefined,
-    "FAST"
-  );
 
-}
+    // Στο mirrorY:
+    // κρατάμε σωστή θέση πίσω από τον επισκέπτη
+    // και γυρίζουμε την πίσω όψη 180°
+    if (
+      side === "back" &&
+      mode === "mirrorY"
+    ) {
 
-    cropMarks(pdf, x, y, cardW, cardH);
+      canvas =
+        rotateCanvas180(canvas);
+
+    }
+
+
+    pdf.addImage(
+      canvas.toDataURL(
+        "image/jpeg",
+        .94
+      ),
+      "JPEG",
+      x,
+      y,
+      cardW,
+      cardH,
+      undefined,
+      "FAST"
+    );
+
+
+    cropMarks(
+      pdf,
+      x,
+      y,
+      cardW,
+      cardH
+    );
+
   }
 }
 
