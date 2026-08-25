@@ -10,47 +10,60 @@
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
 
   <style>
-    * { box-sizing: border-box; }
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
       padding: 24px;
       min-height: 100vh;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-      background: linear-gradient(180deg, #f6f8fb 0%, #eef2f7 100%);
+      font-family: Arial, sans-serif;
+      background: #f3f5f8;
       color: #182235;
     }
+
     .wrap {
-      max-width: 900px;
+      max-width: 1000px;
       margin: 0 auto;
     }
+
     .header {
       text-align: center;
       margin-bottom: 22px;
     }
+
     .header h1 {
+      margin: 0 0 6px;
       font-size: 28px;
-      margin: 0 0 7px;
     }
+
     .header p {
-      color: #6b7280;
       margin: 0;
+      color: #6b7280;
     }
+
     .card {
       background: #fff;
       border: 1px solid #e6e9ee;
-      border-radius: 20px;
+      border-radius: 18px;
       padding: 22px;
-      box-shadow: 0 10px 35px rgba(0,0,0,.07);
+      box-shadow: 0 8px 28px rgba(0,0,0,.07);
       margin-bottom: 20px;
     }
+
     .grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 16px;
     }
+
     @media(max-width:700px) {
-      .grid { grid-template-columns: 1fr; }
+      .grid {
+        grid-template-columns: 1fr;
+      }
     }
+
     label {
       display: block;
       font-size: 13px;
@@ -58,31 +71,33 @@
       margin-bottom: 7px;
       color: #4b5563;
     }
+
     input[type=file] {
       width: 100%;
-      padding: 13px;
+      padding: 12px;
       border: 1px solid #d5dae2;
-      border-radius: 12px;
+      border-radius: 10px;
       background: #fafafa;
     }
+
     .button {
-      border: 0;
-      border-radius: 13px;
-      padding: 14px 18px;
-      font-size: 16px;
-      font-weight: 750;
-      cursor: pointer;
       width: 100%;
       margin-top: 18px;
-    }
-    .button-primary {
+      padding: 14px 18px;
+      border: 0;
+      border-radius: 12px;
       background: #111827;
-      color: white;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
     }
+
     .button:disabled {
       opacity: .45;
       cursor: default;
     }
+
     #status {
       margin-top: 16px;
       padding: 14px;
@@ -91,91 +106,130 @@
       color: #4b5563;
       text-align: center;
     }
-    .success { background:#dcfce7 !important; color:#166534 !important; }
-    .error { background:#fee2e2 !important; color:#991b1b !important; }
-    .working { background:#eff6ff !important; color:#1d4ed8 !important; }
+
+    .success {
+      background: #dcfce7 !important;
+      color: #166534 !important;
+    }
+
+    .error {
+      background: #fee2e2 !important;
+      color: #991b1b !important;
+    }
+
+    .working {
+      background: #eff6ff !important;
+      color: #1d4ed8 !important;
+    }
+
     .preview-wrap {
       display: flex;
-      gap: 18px;
+      gap: 22px;
       justify-content: center;
       flex-wrap: wrap;
     }
+
     .preview-block {
       text-align: center;
     }
+
     .preview-label {
       font-size: 12px;
       font-weight: 700;
-      color:#6b7280;
+      color: #6b7280;
       margin-bottom: 7px;
       text-transform: uppercase;
       letter-spacing: .7px;
     }
+
     .preview-canvas {
-      width: 240px;
-      height: 360px;
+      width: 360px;
+      height: 240px;
       border: 1px solid #d6dae1;
       border-radius: 8px;
-      background:white;
+      background: #fff;
       box-shadow: 0 4px 14px rgba(0,0,0,.07);
     }
+
     .note {
       margin-top: 14px;
       font-size: 13px;
-      color:#6b7280;
+      color: #6b7280;
       line-height: 1.5;
     }
   </style>
 </head>
+
 <body>
+
 <div class="wrap">
+
   <div class="header">
     <h1>QR Badge Generator</h1>
-    <p>Excel → QR → καρτέλες 6×9 cm → PDF</p>
+    <p>Excel → QR → καρτέλες 9 × 6 cm → PDF</p>
   </div>
 
   <div class="card">
+
     <div class="grid">
+
       <div>
         <label>Αρχείο Excel (.xlsx)</label>
         <input id="excelFile" type="file" accept=".xlsx,.xls">
       </div>
+
       <div>
-        <label>Λογότυπο (προαιρετικό - υπάρχει ήδη το προεπιλεγμένο)</label>
+        <label>Λογότυπο</label>
         <input id="logoFile" type="file" accept="image/*">
       </div>
+
     </div>
 
-    <button id="generateBtn" class="button button-primary" disabled>
+    <button id="generateBtn" class="button" disabled>
       ΔΗΜΙΟΥΡΓΙΑ PDF
     </button>
 
-    <div id="status">Επίλεξε το Excel με στήλες CODE, NAME, COMPANY.</div>
+    <div id="status">
+      Επίλεξε Excel με στήλες CODE, NAME, COMPANY.
+    </div>
 
     <div class="note">
-      Το CODE μπαίνει μόνο μέσα στο QR και δεν εμφανίζεται τυπωμένο.
+      Το CODE δεν εμφανίζεται τυπωμένο. Χρησιμοποιείται μόνο για το QR.
       Κάθε επισκέπτης δημιουργεί 2 σελίδες PDF: εμπρός και πίσω.
     </div>
+
   </div>
 
   <div class="card">
+
     <div class="preview-wrap">
+
       <div class="preview-block">
         <div class="preview-label">Μπροστά</div>
-        <canvas id="frontPreview" class="preview-canvas" width="600" height="900"></canvas>
+        <canvas id="frontPreview"
+                class="preview-canvas"
+                width="900"
+                height="600"></canvas>
       </div>
+
       <div class="preview-block">
         <div class="preview-label">Πίσω</div>
-        <canvas id="backPreview" class="preview-canvas" width="600" height="900"></canvas>
+        <canvas id="backPreview"
+                class="preview-canvas"
+                width="900"
+                height="600"></canvas>
       </div>
+
     </div>
+
   </div>
+
 </div>
 
 <script>
-const DEFAULT_LOGO = "data:image/jpeg;base64,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";
+
 let rows = [];
-let logoDataUrl = DEFAULT_LOGO;
+let logoDataUrl = null;
 
 const excelInput = document.getElementById("excelFile");
 const logoInput = document.getElementById("logoFile");
@@ -192,241 +246,770 @@ function setStatus(text, cls="") {
 }
 
 async function readLogo(e) {
+
   const file = e.target.files[0];
+
   if (!file) {
-    logoDataUrl = DEFAULT_LOGO;
+    logoDataUrl = null;
     return;
   }
+
   logoDataUrl = await fileToDataUrl(file);
-  if (rows.length) renderPreview(rows[0]);
+
+  if (rows.length) {
+    await renderPreview(rows[0]);
+  }
 }
 
 async function readExcel(e) {
+
   const file = e.target.files[0];
+
   generateBtn.disabled = true;
+
   if (!file) return;
 
   try {
+
     setStatus("Ανάγνωση Excel...", "working");
+
     const data = await file.arrayBuffer();
-    const wb = XLSX.read(data, {type:"array"});
+
+    const wb = XLSX.read(data, {
+      type: "array"
+    });
+
     const ws = wb.Sheets[wb.SheetNames[0]];
-    const json = XLSX.utils.sheet_to_json(ws, {defval:""});
 
-    if (!json.length) throw new Error("Το Excel δεν έχει δεδομένα.");
+    const json = XLSX.utils.sheet_to_json(ws, {
+      defval: ""
+    });
 
-    const headers = Object.keys(json[0]).map(x => String(x).trim().toUpperCase());
-    for (const req of ["CODE","NAME","COMPANY"]) {
+    if (!json.length) {
+      throw new Error("Το Excel δεν έχει δεδομένα.");
+    }
+
+    const headers =
+      Object.keys(json[0])
+        .map(x => String(x).trim().toUpperCase());
+
+    for (const req of ["CODE", "NAME", "COMPANY"]) {
+
       if (!headers.includes(req)) {
-        throw new Error(`Λείπει η στήλη ${req}.`);
+        throw new Error("Λείπει η στήλη " + req);
       }
     }
 
-    rows = json
-      .map(r => {
-        const obj = {};
-        for (const [k,v] of Object.entries(r)) {
-          obj[String(k).trim().toUpperCase()] = v;
-        }
-        return {
-          code: String(obj.CODE || "").trim(),
-          name: String(obj.NAME || "").trim(),
-          company: String(obj.COMPANY || "").trim()
-        };
-      })
-      .filter(r => r.code && r.name);
+    rows = json.map(r => {
 
-    if (!rows.length) throw new Error("Δεν βρέθηκαν έγκυρες γραμμές CODE/NAME.");
+      const obj = {};
+
+      for (const [k,v] of Object.entries(r)) {
+
+        obj[String(k).trim().toUpperCase()] = v;
+      }
+
+      return {
+        code: String(obj.CODE || "").trim(),
+        name: String(obj.NAME || "").trim(),
+        company: String(obj.COMPANY || "").trim()
+      };
+
+    }).filter(r => r.code && r.name);
+
+    if (!rows.length) {
+      throw new Error("Δεν βρέθηκαν έγκυρες εγγραφές.");
+    }
 
     generateBtn.disabled = false;
-    setStatus(`Βρέθηκαν ${rows.length} επισκέπτες. Έτοιμο για δημιουργία PDF.`, "success");
+
+    setStatus(
+      "Βρέθηκαν " + rows.length + " επισκέπτες.",
+      "success"
+    );
+
     await renderPreview(rows[0]);
 
-  } catch(err) {
+  }
+  catch(err) {
+
     console.error(err);
+
     rows = [];
-    setStatus("Σφάλμα: " + err.message, "error");
+
+    setStatus(
+      "Σφάλμα: " + err.message,
+      "error"
+    );
   }
 }
 
 function fileToDataUrl(file) {
+
   return new Promise((resolve,reject) => {
+
     const r = new FileReader();
+
     r.onload = () => resolve(r.result);
+
     r.onerror = reject;
+
     r.readAsDataURL(file);
+
   });
 }
 
 function loadImage(src) {
+
   return new Promise((resolve,reject) => {
+
     const img = new Image();
+
     img.onload = () => resolve(img);
+
     img.onerror = reject;
+
     img.src = src;
+
   });
 }
 
 function fitText(ctx, text, maxWidth, startPx, minPx, weight=700) {
+
   let size = startPx;
+
   while (size > minPx) {
-    ctx.font = `${weight} ${size}px Arial, sans-serif`;
-    if (ctx.measureText(text).width <= maxWidth) break;
+
+    ctx.font =
+      weight + " " +
+      size +
+      "px Arial, sans-serif";
+
+    if (
+      ctx.measureText(text).width <= maxWidth
+    ) {
+      break;
+    }
+
     size -= 2;
   }
+
   return size;
 }
 
 function wrapText(ctx, text, maxWidth) {
-  const words = String(text).split(/\s+/);
+
+  const words =
+    String(text).split(/\s+/);
+
   const lines = [];
+
   let line = "";
+
   for (const word of words) {
-    const test = line ? line + " " + word : word;
-    if (ctx.measureText(test).width <= maxWidth) line = test;
-    else {
-      if (line) lines.push(line);
+
+    const test =
+      line
+        ? line + " " + word
+        : word;
+
+    if (
+      ctx.measureText(test).width <= maxWidth
+    ) {
+
+      line = test;
+
+    } else {
+
+      if (line) {
+        lines.push(line);
+      }
+
       line = word;
     }
   }
-  if (line) lines.push(line);
+
+  if (line) {
+    lines.push(line);
+  }
+
   return lines;
 }
 
+
+// ==========================================
+// FRONT
+// ==========================================
+
 async function drawFront(canvas, person) {
-  const ctx = canvas.getContext("2d");
-  const W = canvas.width, H = canvas.height;
+
+  const ctx =
+    canvas.getContext("2d");
+
+  const W = canvas.width;
+  const H = canvas.height;
+
   ctx.clearRect(0,0,W,H);
+
   ctx.fillStyle = "#ffffff";
+
   ctx.fillRect(0,0,W,H);
 
-  // 1 cm top margin on a 9 cm-high card = 100 px in this 900px canvas.
-  const topMargin = 100;
 
-  const logo = await loadImage(logoDataUrl);
-  const maxLogoW = 440;
-  const maxLogoH = 135;
-  const scale = Math.min(maxLogoW/logo.width, maxLogoH/logo.height);
-  const lw = logo.width * scale;
-  const lh = logo.height * scale;
-  ctx.drawImage(logo, (W-lw)/2, topMargin, lw, lh);
+  // 1 cm περιθώριο από επάνω
+  // 60 mm = 600 px
+  // άρα 10 mm = 100 px
 
-  let y = topMargin + lh + 70;
+  let y = 100;
 
-  ctx.fillStyle = "#111827";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
 
-  let nameSize = fitText(ctx, person.name, 510, 48, 30, 800);
-  ctx.font = `800 ${nameSize}px Arial, sans-serif`;
-  let nameLines = wrapText(ctx, person.name, 510);
-  nameLines = nameLines.slice(0,2);
-  for (const line of nameLines) {
-    ctx.fillText(line, W/2, y);
-    y += nameSize * 1.15;
+  // LOGO
+
+  if (logoDataUrl) {
+
+    const logo =
+      await loadImage(logoDataUrl);
+
+    const maxLogoW = 520;
+    const maxLogoH = 105;
+
+    const scale =
+      Math.min(
+        maxLogoW / logo.width,
+        maxLogoH / logo.height
+      );
+
+    const lw =
+      logo.width * scale;
+
+    const lh =
+      logo.height * scale;
+
+    ctx.drawImage(
+      logo,
+      (W - lw) / 2,
+      y,
+      lw,
+      lh
+    );
+
+    y += lh + 70;
+
+  } else {
+
+    y += 60;
+
   }
+
+
+  // NAME
+
+  ctx.fillStyle =
+    "#111827";
+
+  ctx.textAlign =
+    "center";
+
+  ctx.textBaseline =
+    "middle";
+
+
+  let nameSize =
+    fitText(
+      ctx,
+      person.name,
+      760,
+      55,
+      34,
+      800
+    );
+
+
+  ctx.font =
+    "800 " +
+    nameSize +
+    "px Arial, sans-serif";
+
+
+  let nameLines =
+    wrapText(
+      ctx,
+      person.name,
+      760
+    );
+
+
+  nameLines =
+    nameLines.slice(0,2);
+
+
+  for (const line of nameLines) {
+
+    ctx.fillText(
+      line,
+      W / 2,
+      y
+    );
+
+    y +=
+      nameSize * 1.15;
+  }
+
+
+  // COMPANY
 
   if (person.company) {
+
     y += 35;
-    ctx.fillStyle = "#4b5563";
-    const companySize = fitText(ctx, person.company, 500, 31, 22, 500);
-    ctx.font = `500 ${companySize}px Arial, sans-serif`;
-    const companyLines = wrapText(ctx, person.company, 500).slice(0,3);
+
+    ctx.fillStyle =
+      "#4b5563";
+
+
+    const companySize =
+      fitText(
+        ctx,
+        person.company,
+        700,
+        36,
+        24,
+        500
+      );
+
+
+    ctx.font =
+      "500 " +
+      companySize +
+      "px Arial, sans-serif";
+
+
+    const companyLines =
+      wrapText(
+        ctx,
+        person.company,
+        700
+      ).slice(0,2);
+
+
     for (const line of companyLines) {
-      ctx.fillText(line, W/2, y);
-      y += companySize * 1.25;
+
+      ctx.fillText(
+        line,
+        W / 2,
+        y
+      );
+
+      y +=
+        companySize * 1.25;
     }
+
   }
+
 }
 
-async function drawBack(canvas, person) {
-  const ctx = canvas.getContext("2d");
-  const W = canvas.width, H = canvas.height;
-  ctx.clearRect(0,0,W,H);
-  ctx.fillStyle = "#ffffff";
-  ctx.fillRect(0,0,W,H);
 
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillStyle = "#111827";
+// ==========================================
+// QR CREATION
+// ==========================================
 
-  let nameSize = fitText(ctx, person.name, 500, 40, 28, 800);
-  ctx.font = `800 ${nameSize}px Arial, sans-serif`;
-  let nameLines = wrapText(ctx, person.name, 500).slice(0,2);
-  let y = 105;
-  for (const line of nameLines) {
-    ctx.fillText(line, W/2, y);
-    y += nameSize * 1.12;
-  }
+function createQrDataUrl(code) {
 
-  const qr = qrcode(0, "M");
-  qr.addData(person.code);
+  const qr =
+    qrcode(0, "M");
+
+  qr.addData(code);
+
   qr.make();
 
-  const qrImg = await loadImage(qr.createDataURL(10, 4));
-  const qrY = 245;
-  ctx.drawImage(qrImg, 90, qrY, 420, 420);
-
-  ctx.fillStyle = "#4b5563";
-  ctx.font = "700 25px Arial, sans-serif";
-  ctx.fillText("ΣΑΡΩΣΗ ΚΑΤΑ ΤΗΝ ΕΙΣΟΔΟ", W/2, 735);
+  return qr.createDataURL(10, 3);
 }
+
+
+// ==========================================
+// BACK
+// ==========================================
+
+async function drawBack(canvas, person) {
+
+  const ctx =
+    canvas.getContext("2d");
+
+  const W = canvas.width;
+  const H = canvas.height;
+
+  ctx.clearRect(0,0,W,H);
+
+  ctx.fillStyle = "#ffffff";
+
+  ctx.fillRect(0,0,W,H);
+
+
+  ctx.textAlign =
+    "center";
+
+  ctx.textBaseline =
+    "middle";
+
+  ctx.fillStyle =
+    "#111827";
+
+
+  // NAME
+
+  let nameSize =
+    fitText(
+      ctx,
+      person.name,
+      760,
+      45,
+      30,
+      800
+    );
+
+
+  ctx.font =
+    "800 " +
+    nameSize +
+    "px Arial, sans-serif";
+
+
+  let nameLines =
+    wrapText(
+      ctx,
+      person.name,
+      760
+    ).slice(0,2);
+
+
+  let y = 70;
+
+
+  for (const line of nameLines) {
+
+    ctx.fillText(
+      line,
+      W / 2,
+      y
+    );
+
+    y +=
+      nameSize * 1.08;
+  }
+
+
+  // QR
+
+  const qrDataUrl =
+    createQrDataUrl(
+      person.code
+    );
+
+
+  const qrImg =
+    await loadImage(
+      qrDataUrl
+    );
+
+
+  const qrSize =
+    330;
+
+
+  const qrX =
+    (W - qrSize) / 2;
+
+
+  const qrY =
+    180;
+
+
+  ctx.drawImage(
+    qrImg,
+    qrX,
+    qrY,
+    qrSize,
+    qrSize
+  );
+
+
+  // TEXT
+
+  ctx.fillStyle =
+    "#4b5563";
+
+
+  ctx.font =
+    "700 26px Arial, sans-serif";
+
+
+  ctx.fillText(
+    "ΣΑΡΩΣΗ ΚΑΤΑ ΤΗΝ ΕΙΣΟΔΟ",
+    W / 2,
+    555
+  );
+
+}
+
+
+// ==========================================
+// PREVIEW
+// ==========================================
 
 async function renderPreview(person) {
-  await drawFront(document.getElementById("frontPreview"), person);
-  await drawBack(document.getElementById("backPreview"), person);
+
+  await drawFront(
+    document.getElementById("frontPreview"),
+    person
+  );
+
+
+  await drawBack(
+    document.getElementById("backPreview"),
+    person
+  );
+
 }
+
+
+// ==========================================
+// PDF
+// ==========================================
 
 async function generatePdf() {
-  if (!rows.length) return;
 
-  generateBtn.disabled = true;
-  setStatus(`Δημιουργία PDF για ${rows.length} επισκέπτες...`, "working");
+  if (!rows.length) {
+    return;
+  }
+
+
+  generateBtn.disabled =
+    true;
+
+
+  setStatus(
+    "Δημιουργία PDF...",
+    "working"
+  );
+
 
   try {
-    const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF({
-      orientation: "portrait",
-      unit: "mm",
-      format: [60,90],
-      compress: true
-    });
 
-    const front = document.createElement("canvas");
-    front.width = 600; front.height = 900;
-    const back = document.createElement("canvas");
-    back.width = 600; back.height = 900;
 
-    let firstPage = true;
+    const { jsPDF } =
+      window.jspdf;
 
-    for (let i=0; i<rows.length; i++) {
-      const p = rows[i];
 
-      await drawFront(front, p);
-      if (!firstPage) pdf.addPage([60,90], "portrait");
-      firstPage = false;
-      pdf.addImage(front.toDataURL("image/jpeg", .94), "JPEG", 0, 0, 60, 90, undefined, "FAST");
+    const pdf =
+      new jsPDF({
 
-      await drawBack(back, p);
-      pdf.addPage([60,90], "portrait");
-      pdf.addImage(back.toDataURL("image/jpeg", .94), "JPEG", 0, 0, 60, 90, undefined, "FAST");
+        orientation:
+          "landscape",
 
-      if ((i+1) % 25 === 0 || i === rows.length-1) {
-        setStatus(`Δημιουργία: ${i+1} / ${rows.length} επισκέπτες...`, "working");
-        await new Promise(r => setTimeout(r, 0));
+        unit:
+          "mm",
+
+        format:
+          [90,60],
+
+        compress:
+          true
+
+      });
+
+
+    const front =
+      document.createElement(
+        "canvas"
+      );
+
+
+    front.width =
+      900;
+
+
+    front.height =
+      600;
+
+
+    const back =
+      document.createElement(
+        "canvas"
+      );
+
+
+    back.width =
+      900;
+
+
+    back.height =
+      600;
+
+
+    let firstPage =
+      true;
+
+
+    for (
+      let i = 0;
+      i < rows.length;
+      i++
+    ) {
+
+
+      const person =
+        rows[i];
+
+
+      // FRONT
+
+      await drawFront(
+        front,
+        person
+      );
+
+
+      if (!firstPage) {
+
+        pdf.addPage(
+          [90,60],
+          "landscape"
+        );
+
       }
+
+
+      firstPage =
+        false;
+
+
+      pdf.addImage(
+
+        front.toDataURL(
+          "image/jpeg",
+          .95
+        ),
+
+        "JPEG",
+
+        0,
+        0,
+        90,
+        60,
+
+        undefined,
+
+        "FAST"
+
+      );
+
+
+      // BACK
+
+      await drawBack(
+        back,
+        person
+      );
+
+
+      pdf.addPage(
+        [90,60],
+        "landscape"
+      );
+
+
+      pdf.addImage(
+
+        back.toDataURL(
+          "image/jpeg",
+          .95
+        ),
+
+        "JPEG",
+
+        0,
+        0,
+        90,
+        60,
+
+        undefined,
+
+        "FAST"
+
+      );
+
+
+      if (
+        (i + 1) % 25 === 0 ||
+        i === rows.length - 1
+      ) {
+
+        setStatus(
+
+          "Δημιουργία: " +
+          (i + 1) +
+          " / " +
+          rows.length,
+
+          "working"
+
+        );
+
+
+        await new Promise(
+          r => setTimeout(r,0)
+        );
+
+      }
+
     }
 
-    pdf.save("qr_badges_6x9.pdf");
-    setStatus(`Έτοιμο: ${rows.length} καρτέλες / ${rows.length*2} σελίδες PDF.`, "success");
 
-  } catch(err) {
-    console.error(err);
-    setStatus("Σφάλμα δημιουργίας PDF: " + err.message, "error");
-  } finally {
-    generateBtn.disabled = false;
+    pdf.save(
+      "qr_badges_9x6.pdf"
+    );
+
+
+    setStatus(
+
+      "Έτοιμο: " +
+      rows.length +
+      " καρτέλες / " +
+      (rows.length * 2) +
+      " σελίδες.",
+
+      "success"
+
+    );
+
+
   }
+  catch(err) {
+
+
+    console.error(err);
+
+
+    setStatus(
+
+      "Σφάλμα δημιουργίας PDF: " +
+      err.message,
+
+      "error"
+
+    );
+
+  }
+  finally {
+
+
+    generateBtn.disabled =
+      false;
+
+  }
+
 }
+
 </script>
+
 </body>
 </html>
