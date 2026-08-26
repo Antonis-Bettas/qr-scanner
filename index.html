@@ -949,177 +949,152 @@ async function onScanSuccess(decodedText) {
 
 function saveScan(code, device) {
 
+  if (!code) {
+    throw new Error('Empty QR code');
+  }
 
-  const callbackName =
-    "cb" + Date.now();
+  const ss =
+    SpreadsheetApp.openById(SPREADSHEET_ID);
 
+  const scansSheet =
+    ss.getSheetByName(SCANS_SHEET);
 
-  const script =
-    document.createElement("script");
+  if (!scansSheet) {
+    throw new Error('SCANS sheet not found');
+  }
 
+  // -------------------------
+  // VISITOR LOOKUP ΜΕ CACHE
+  // -------------------------
 
+  const cache =
+    CacheService.getScriptCache();
 
-  window[callbackName] =
-    function(response) {
+  const cacheKey =
+    'visitor_' + code;
 
+  let cached =
+    cache.get(cacheKey);
 
-      const result =
-        document.getElementById("result");
-
-
-      const nextButton =
-        document.getElementById("nextButton");
-
-
-
-      if (response.success) {
-
-
-        if (response.found) {
-
-
-          result.className =
-            "status-success";
-
-
-          result.innerHTML =
-
-            "<div class='result-title'>" +
-            "✓ ΚΑΤΑΓΡΑΦΗΚΕ" +
-            "</div>" +
-
-            "<div class='result-name'>" +
-            escapeHtml(response.name) +
-            "</div>" +
-
-            "<div class='result-code'>" +
-            escapeHtml(response.code) +
-            "</div>" +
-
-            "<div class='result-time'>" +
-            escapeHtml(response.timestamp) +
-            "</div>";
+  let visitorName = 'UNKNOWN';
+  let company = '';
+  let found = false;
 
 
-        }
-        else {
+  if (cached) {
+
+    const visitor =
+      JSON.parse(cached);
+
+    visitorName =
+      visitor.name;
+
+    company =
+      visitor.company;
+
+    found =
+      true;
+
+  } else {
+
+    const visitorsSheet =
+      ss.getSheetByName(VISITORS_SHEET);
+
+    if (!visitorsSheet) {
+      throw new Error('VISITORS sheet not found');
+    }
+
+    const data =
+      visitorsSheet
+        .getDataRange()
+        .getValues();
 
 
-          result.className =
-            "status-warning";
+    for (let i = 1; i < data.length; i++) {
+
+      const visitorCode =
+        String(data[i][0])
+          .trim();
+
+      if (visitorCode === code) {
+
+        visitorName =
+          String(data[i][1] || '')
+            .trim();
+
+        company =
+          String(data[i][2] || '')
+            .trim();
+
+        found =
+          true;
 
 
-          result.innerHTML =
+        cache.put(
+          cacheKey,
+          JSON.stringify({
+            name: visitorName,
+            company: company
+          }),
+          21600
+        );
 
-            "<div class='result-title'>" +
-            "⚠ ΑΓΝΩΣΤΟ QR" +
-            "</div>" +
-
-            "<div class='result-code'>" +
-            escapeHtml(response.code) +
-            "</div>" +
-
-            "<div class='result-time'>" +
-            escapeHtml(response.timestamp) +
-            "</div>";
-
-        }
-
-
+        break;
       }
-      else {
+    }
+  }
 
 
-        result.className =
-          "status-error";
+  // -------------------------
+  // ΚΑΤΑΓΡΑΦΗ
+  // -------------------------
+
+  const lock =
+    LockService.getScriptLock();
+
+  lock.waitLock(5000);
+
+  try {
+
+    const timestamp =
+      new Date();
+
+    const nextRow =
+      scansSheet.getLastRow() + 1;
+
+    scansSheet
+      .getRange(nextRow, 1, 1, 4)
+      .setValues([[
+        timestamp,
+        code,
+        visitorName,
+        device
+      ]]);
 
 
-        result.innerHTML =
-
-          "<div class='result-title'>" +
-          "ΣΦΑΛΜΑ" +
-          "</div>" +
-
-          escapeHtml(
-            response.message
-          );
-
-      }
+    const formattedTime =
+      Utilities.formatDate(
+        timestamp,
+        Session.getScriptTimeZone(),
+        'd/M/yy HH:mm:ss'
+      );
 
 
-
-      nextButton.style.display =
-        "block";
-
-
-      script.remove();
-
-
-      delete window[callbackName];
-
+    return {
+      success: true,
+      found: found,
+      code: code,
+      name: visitorName,
+      company: company,
+      device: device,
+      timestamp: formattedTime
     };
 
+  } finally {
 
+    lock.releaseLock();
 
-  script.onerror =
-    function() {
-
-
-      const result =
-        document.getElementById("result");
-
-
-      const nextButton =
-        document.getElementById("nextButton");
-
-
-      result.className =
-        "status-error";
-
-
-      result.innerHTML =
-
-        "<div class='result-title'>" +
-        "ΣΦΑΛΜΑ ΕΠΙΚΟΙΝΩΝΙΑΣ" +
-        "</div>" +
-
-        "Δεν ήταν δυνατή η επικοινωνία με το Google Sheet.";
-
-
-      nextButton.style.display =
-        "block";
-
-
-      script.remove();
-
-
-      delete window[callbackName];
-
-    };
-
-
-
-  script.src =
-
-    API_URL +
-
-    "?action=scan" +
-
-    "&code=" +
-    encodeURIComponent(code) +
-
-    "&device=" +
-    encodeURIComponent(device) +
-
-    "&callback=" +
-    encodeURIComponent(callbackName);
-
-
-
-  document.body.appendChild(
-    script
-  );
-
+  }
 }
 
 
