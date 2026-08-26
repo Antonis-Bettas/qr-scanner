@@ -678,14 +678,101 @@ let cameraId = null;
 let scannerRunning = false;
 
 let scanLocked = false;
+let visitorsCache = {};
+let visitorsLoaded = false;
 
 
+function loadVisitors() {
 
+  return new Promise((resolve, reject) => {
+
+    const callbackName =
+      "visitorsCb" + Date.now();
+
+    const script =
+      document.createElement("script");
+
+
+    window[callbackName] =
+      function(response) {
+
+        if (
+          response.success &&
+          response.visitors
+        ) {
+
+          visitorsCache =
+            response.visitors;
+
+          visitorsLoaded =
+            true;
+
+          console.log(
+            "Visitors loaded:",
+            response.count
+          );
+
+          script.remove();
+
+          delete window[callbackName];
+
+          resolve(response.count);
+
+        } else {
+
+          script.remove();
+
+          delete window[callbackName];
+
+          reject(
+            new Error(
+              response.message ||
+              "Δεν φορτώθηκαν οι επισκέπτες."
+            )
+          );
+
+        }
+
+      };
+
+
+    script.onerror =
+      function() {
+
+        script.remove();
+
+        delete window[callbackName];
+
+        reject(
+          new Error(
+            "Σφάλμα φόρτωσης επισκεπτών"
+          )
+        );
+
+      };
+
+
+    script.src =
+      API_URL +
+      "?action=getVisitors" +
+      "&callback=" +
+      encodeURIComponent(callbackName);
+
+
+    document.body.appendChild(script);
+
+  });
+
+}
+
+  
 // ==========================================
 // ΒΡΕΣ ΑΥΤΟΜΑΤΑ CAMERA 0
 // ==========================================
 
-async function getCamera() {
+
+
+  async function getCamera() {
 
   if (cameraId) {
     return cameraId;
@@ -882,7 +969,43 @@ async function onScanSuccess(decodedText) {
 
   const code =
     decodedText.trim();
+const visitor =
+  visitorsCache[code];
 
+const result =
+  document.getElementById("result");
+
+if (visitor) {
+
+  result.className =
+    "status-loading";
+
+  result.innerHTML =
+    "<div class='result-title'>✓ QR ΑΝΑΓΝΩΡΙΣΤΗΚΕ</div>" +
+    "<div class='result-name'>" +
+    escapeHtml(visitor.name) +
+    "</div>" +
+    "<div class='result-code'>" +
+    escapeHtml(code) +
+    "</div>" +
+    "<div class='result-time'>" +
+    "Αποθήκευση..." +
+    "</div>";
+
+} else {
+
+  result.className =
+    "status-warning";
+
+  result.innerHTML =
+    "<div class='result-title'>⚠ ΑΓΝΩΣΤΟ QR</div>" +
+    "<div class='result-code'>" +
+    escapeHtml(code) +
+    "</div>" +
+    "<div class='result-time'>" +
+    "Αποθήκευση..." +
+    "</div>";
+}
 
   const device =
     document
@@ -1160,6 +1283,50 @@ function escapeHtml(value) {
 
 }
 
+
+window.addEventListener(
+  "load",
+  async function() {
+
+    const result =
+      document.getElementById("result");
+
+    try {
+
+      result.className =
+        "status-loading";
+
+      result.innerHTML =
+        "Φόρτωση λίστας επισκεπτών...";
+
+      const count =
+        await loadVisitors();
+
+      result.className =
+        "status-waiting";
+
+      result.innerHTML =
+        "Έτοιμοι " +
+        count +
+        " επισκέπτες.<br>" +
+        "Πατήστε «Έναρξη Scanning»";
+
+    }
+    catch(error) {
+
+      result.className =
+        "status-error";
+
+      result.innerHTML =
+        "Δεν φορτώθηκε η λίστα επισκεπτών.<br>" +
+        error.message;
+
+    }
+
+  }
+);
+
+  
 
 </script>
 
