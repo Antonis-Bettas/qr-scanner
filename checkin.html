@@ -120,8 +120,7 @@ function showConfirmed(alreadyCheckedIn,timestamp){
   resultBox.className='status status-success';
 
   if(alreadyCheckedIn){
-    resultBox.innerHTML='✓ Η συμμετοχή σας έχει ήδη καταχωρηθεί.'+
-      (timestamp?'<br><small>Καταχώρηση: '+escapeHtml(String(timestamp))+'</small>':'');
+    resultBox.innerHTML='✓ Η συμμετοχή σας έχει ήδη καταχωρηθεί.';
   }else{
     resultBox.innerHTML='✓ Η ΣΥΜΜΕΤΟΧΗ ΣΑΣ ΚΑΤΑΧΩΡΗΘΗΚΕ'+
       '<br><small>Σας ευχαριστούμε. Σας περιμένουμε στη διοργάνωση.</small>';
