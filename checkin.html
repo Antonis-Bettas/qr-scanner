@@ -77,6 +77,7 @@ const googleFormFrame=document.getElementById('googleFormFrame');
 
 const params=new URLSearchParams(window.location.search);
 const token=params.get('token')||'';
+let currentVisitor = null;
 
 function jsonp(action, extraParams={}) {
   return new Promise((resolve,reject)=>{
@@ -144,11 +145,14 @@ async function loadVisitor(){
 
   try{
     const data=await jsonp('getVisitor',{token});
-    if(!data || !data.success || !data.found){
-      throw new Error('Ο σύνδεσμος επιβεβαίωσης δεν είναι έγκυρος.');
-    }
 
-    visitorName.textContent=data.name||'';
+if(!data || !data.success || !data.found){
+  throw new Error('Ο σύνδεσμος επιβεβαίωσης δεν είναι έγκυρος.');
+}
+
+currentVisitor = data;
+
+visitorName.textContent=data.name||'';
     visitorCompany.textContent=data.company||'';
     loadingBox.classList.add('hidden');
     visitorBox.classList.remove('hidden');
@@ -211,7 +215,7 @@ function escapeHtml(value){
   );
 
   return (
-    FORM_BASE_URL +
+    FORM_EMBED_URL  +
     '?' +
     params.toString()
   );
