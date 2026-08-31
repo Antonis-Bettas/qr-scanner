@@ -124,7 +124,7 @@
         statusBox.textContent = 'ΔΕΝ ΕΧΕΙ ΣΤΑΛΕΙ';
         sendBtn.textContent = 'ΣΤΕΙΛΕ E-MAIL';
         // Θα ενεργοποιηθεί στο επόμενο βήμα.
-        sendBtn.disabled = true;
+        sendBtn.disabled = false;
       }
     } catch (error) {
       currentVisitor = null;
@@ -136,7 +136,105 @@
 
   prevBtn.addEventListener('click', () => { if (currentIndex > 1) loadVisitor(currentIndex - 1); });
   nextBtn.addEventListener('click', () => { if (currentIndex < totalVisitors) loadVisitor(currentIndex + 1); });
-  sendBtn.addEventListener('click', () => { /* θα ενεργοποιηθεί στο επόμενο βήμα */ });
+ sendBtn.addEventListener('click', async () => {
+
+  if (!currentVisitor) {
+    return;
+  }
+
+  const ok = confirm(
+    'Να σταλεί email στον/στην:\n\n' +
+    currentVisitor.name +
+    '\n' +
+    currentVisitor.email +
+    '\n\nΘέλεις να συνεχίσεις;'
+  );
+
+  if (!ok) {
+    return;
+  }
+
+  sendBtn.disabled = true;
+  sendBtn.textContent = 'ΑΠΟΣΤΟΛΗ...';
+
+  statusBox.className = 'status pending';
+  statusBox.textContent = 'ΓΙΝΕΤΑΙ ΑΠΟΣΤΟΛΗ...';
+
+  messageEl.textContent = '';
+
+  try {
+
+    const result = await jsonp({
+      action: 'sendZohoCheckinEmail',
+      index: currentIndex
+    });
+
+    if (!result.success) {
+
+      if (result.alreadySent) {
+
+        statusBox.className = 'status sent';
+        statusBox.textContent = '✓ ΤΟ EMAIL ΕΧΕΙ ΗΔΗ ΣΤΑΛΕΙ';
+
+        sendBtn.textContent = 'EMAIL ΗΔΗ ΣΤΑΛΜΕΝΟ';
+        sendBtn.disabled = true;
+
+        return;
+      }
+
+      throw new Error(
+        result.message || 'Αποτυχία αποστολής'
+      );
+    }
+
+
+    statusBox.className = 'status sent';
+
+    statusBox.innerHTML =
+      '✓ ΤΟ EMAIL ΕΧΕΙ ΣΤΑΛΕΙ' +
+      (result.sendMailAt
+        ? '<br><small>' +
+          escapeHtml(result.sendMailAt) +
+          '</small>'
+        : '');
+
+
+    sendBtn.textContent =
+      'EMAIL ΗΔΗ ΣΤΑΛΜΕΝΟ';
+
+    sendBtn.disabled = true;
+
+
+    messageEl.textContent =
+      'Η αποστολή ολοκληρώθηκε επιτυχώς.';
+
+
+    currentVisitor.sendMail =
+      'SENT';
+
+    currentVisitor.sendMailAt =
+      result.sendMailAt || '';
+
+  } catch (error) {
+
+    statusBox.className =
+      'status pending';
+
+    statusBox.textContent =
+      'ΔΕΝ ΣΤΑΛΘΗΚΕ';
+
+    messageEl.innerHTML =
+      '<span class="error">' +
+      escapeHtml(error.message) +
+      '</span>';
+
+    sendBtn.textContent =
+      'ΣΤΕΙΛΕ E-MAIL';
+
+    sendBtn.disabled = false;
+  }
+
+});
 
   function escapeHtml(value) {
     return String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
