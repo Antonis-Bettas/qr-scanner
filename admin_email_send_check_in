@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Αποστολή Check-in Email</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: Arial, Helvetica, sans-serif; background: #f4f6f8; color: #1f2937; }
+    .wrap { max-width: 760px; margin: 32px auto; padding: 16px; }
+    .card { background: #fff; border-radius: 16px; box-shadow: 0 8px 28px rgba(0,0,0,.08); overflow: hidden; }
+    .header { padding: 22px 24px; border-bottom: 1px solid #e5e7eb; text-align: center; }
+    .header img { max-width: 210px; max-height: 80px; object-fit: contain; margin-bottom: 12px; }
+    .header h1 { margin: 0; font-size: 22px; }
+    .content { padding: 24px; }
+    .field { margin-bottom: 18px; }
+    .label { font-size: 12px; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: .05em; margin-bottom: 5px; }
+    .value { font-size: 17px; font-weight: 600; word-break: break-word; }
+    .value.small { font-size: 14px; font-weight: 400; font-family: monospace; background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 8px; padding: 10px; }
+    .status { padding: 12px 14px; border-radius: 10px; font-weight: 700; text-align: center; margin: 22px 0; background: #f3f4f6; }
+    .status.sent { background: #ecfdf5; color: #047857; }
+    .status.pending { background: #fff7ed; color: #c2410c; }
+    .send-btn { width: 100%; border: 0; border-radius: 10px; padding: 15px 18px; font-size: 16px; font-weight: 700; cursor: pointer; background: #111827; color: #fff; margin-bottom: 18px; }
+    .send-btn:disabled { opacity: .5; cursor: not-allowed; }
+    .nav { display: flex; gap: 12px; justify-content: space-between; }
+    .nav button { flex: 1; border: 1px solid #d1d5db; background: #fff; border-radius: 10px; padding: 12px; font-size: 15px; font-weight: 700; cursor: pointer; }
+    .nav button:disabled { opacity: .4; cursor: not-allowed; }
+    .counter { text-align: center; margin-top: 18px; font-weight: 700; color: #6b7280; }
+    .message { margin-top: 16px; text-align: center; font-size: 14px; color: #6b7280; }
+    .error { color: #b91c1c; font-weight: 700; }
+    @media (max-width: 600px) { .wrap { margin: 10px auto; padding: 10px; } .content { padding: 18px; } .nav { flex-direction: column; } }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <div class="header">
+      <img src="zoomlogo.jpg" alt="Logo">
+      <h1>Αποστολή Check-in Email</h1>
+    </div>
+    <div class="content">
+      <div class="field"><div class="label">Κωδικός</div><div class="value" id="code">—</div></div>
+      <div class="field"><div class="label">Επισκέπτης</div><div class="value" id="name">—</div></div>
+      <div class="field"><div class="label">Εταιρεία / Φορέας</div><div class="value" id="company">—</div></div>
+      <div class="field"><div class="label">Email</div><div class="value" id="email">—</div></div>
+      <div class="field"><div class="label">Token</div><div class="value small" id="token">—</div></div>
+      <div class="field"><div class="label">Check-in Link</div><div class="value small" id="checkinLink">—</div></div>
+      <div id="statusBox" class="status pending">Φόρτωση...</div>
+      <button id="sendBtn" class="send-btn" type="button" disabled>ΣΤΕΙΛΕ E-MAIL</button>
+      <div class="nav">
+        <button id="prevBtn" type="button">← ΠΡΟΗΓΟΥΜΕΝΟ</button>
+        <button id="nextBtn" type="button">ΕΠΟΜΕΝΟ →</button>
+      </div>
+      <div class="counter" id="counter">— / —</div>
+      <div class="message" id="message"></div>
+    </div>
+  </div>
+</div>
+<script>
+  // ΒΑΛΕ ΕΔΩ ΤΟ URL ΤΟΥ PRE-CHECKIN WEB APP ΠΟΥ ΤΕΛΕΙΩΝΕΙ ΣΕ /exec
+  const API_URL = 'https://script.google.com/macros/s/AKfycbzYDoinhNsl0oXgNCzdSTOmp0FYwJ1HDmQYsxFbhIBu5m-YWlz9OFrFDXisXyWxDPEF/exec';
+
+  let currentIndex = 1;
+  let totalVisitors = 1;
+  let currentVisitor = null;
+
+  const codeEl = document.getElementById('code');
+  const nameEl = document.getElementById('name');
+  const companyEl = document.getElementById('company');
+  const emailEl = document.getElementById('email');
+  const tokenEl = document.getElementById('token');
+  const checkinLinkEl = document.getElementById('checkinLink');
+  const statusBox = document.getElementById('statusBox');
+  const sendBtn = document.getElementById('sendBtn');
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const counterEl = document.getElementById('counter');
+  const messageEl = document.getElementById('message');
+
+  function jsonp(params) {
+    return new Promise((resolve, reject) => {
+      const callbackName = 'cb_' + Date.now() + '_' + Math.floor(Math.random() * 100000);
+      const script = document.createElement('script');
+      const query = new URLSearchParams({ ...params, callback: callbackName });
+      const timeout = setTimeout(() => { cleanup(); reject(new Error('Timeout επικοινωνίας με το Apps Script')); }, 15000);
+      function cleanup() { clearTimeout(timeout); try { delete window[callbackName]; } catch(e) {} if (script.parentNode) script.parentNode.removeChild(script); }
+      window[callbackName] = function(data) { cleanup(); resolve(data); };
+      script.onerror = function() { cleanup(); reject(new Error('Αποτυχία φόρτωσης δεδομένων')); };
+      script.src = API_URL + '?' + query.toString();
+      document.body.appendChild(script);
+    });
+  }
+
+  async function loadVisitor(index) {
+    messageEl.textContent = '';
+    sendBtn.disabled = true;
+    statusBox.className = 'status pending';
+    statusBox.textContent = 'Φόρτωση...';
+
+    try {
+      const data = await jsonp({ action: 'getMailVisitor', index: index });
+      if (!data.success) throw new Error(data.message || 'Άγνωστο σφάλμα');
+
+      currentVisitor = data;
+      currentIndex = data.index;
+      totalVisitors = data.total;
+      codeEl.textContent = data.code || '—';
+      nameEl.textContent = data.name || '—';
+      companyEl.textContent = data.company || '—';
+      emailEl.textContent = data.email || '—';
+      tokenEl.textContent = data.token || '—';
+      checkinLinkEl.textContent = data.checkinLink || '—';
+      counterEl.textContent = currentIndex + ' / ' + totalVisitors;
+      prevBtn.disabled = currentIndex <= 1;
+      nextBtn.disabled = currentIndex >= totalVisitors;
+
+      if (String(data.sendMail || '').toUpperCase() === 'SENT') {
+        statusBox.className = 'status sent';
+        statusBox.innerHTML = '✓ ΤΟ EMAIL ΕΧΕΙ ΣΤΑΛΕΙ' + (data.sendMailAt ? '<br><small>' + escapeHtml(data.sendMailAt) + '</small>' : '');
+        sendBtn.textContent = 'EMAIL ΗΔΗ ΣΤΑΛΜΕΝΟ';
+        sendBtn.disabled = true;
+      } else {
+        statusBox.className = 'status pending';
+        statusBox.textContent = 'ΔΕΝ ΕΧΕΙ ΣΤΑΛΕΙ';
+        sendBtn.textContent = 'ΣΤΕΙΛΕ E-MAIL';
+        // Θα ενεργοποιηθεί στο επόμενο βήμα.
+        sendBtn.disabled = true;
+      }
+    } catch (error) {
+      currentVisitor = null;
+      statusBox.className = 'status';
+      statusBox.textContent = 'ΣΦΑΛΜΑ';
+      messageEl.innerHTML = '<span class="error">' + escapeHtml(error.message) + '</span>';
+    }
+  }
+
+  prevBtn.addEventListener('click', () => { if (currentIndex > 1) loadVisitor(currentIndex - 1); });
+  nextBtn.addEventListener('click', () => { if (currentIndex < totalVisitors) loadVisitor(currentIndex + 1); });
+  sendBtn.addEventListener('click', () => { /* θα ενεργοποιηθεί στο επόμενο βήμα */ });
+
+  function escapeHtml(value) {
+    return String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+  }
+
+  loadVisitor(1);
+</script>
+</body>
+</html>
