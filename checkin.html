@@ -64,7 +64,7 @@
 
 <script>
 const API_URL = 'https://script.google.com/macros/s/AKfycbzYDoinhNsl0oXgNCzdSTOmp0FYwJ1HDmQYsxFbhIBu5m-YWlz9OFrFDXisXyWxDPEF/exec';
-const FORM_EMBED_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSf6ptY5LIcbJBtDN4LgynWwk20FCYlnsDzPtHvjUclNsdIMnA/viewform?embedded=true';
+const FORM_EMBED_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSf6ptY5LIcbJBtDN4LgynWwk20FCYlnsDzPtHvjUclNsdIMnA/viewform';
 
 const loadingBox=document.getElementById('loadingBox');
 const visitorBox=document.getElementById('visitorBox');
@@ -110,8 +110,10 @@ function showError(message){
 }
 
 function showForm(){
-  if(!FORM_EMBED_URL || FORM_EMBED_URL.includes('PASTE_GOOGLE_FORM')) return;
-  googleFormFrame.src=FORM_EMBED_URL;
+  if(!currentVisitor) return;
+
+  googleFormFrame.src = buildPrefilledFormUrl(currentVisitor);
+
   formSection.classList.remove('hidden');
 }
 
@@ -182,6 +184,38 @@ function escapeHtml(value){
     .replace(/>/g,'&gt;')
     .replace(/"/g,'&quot;')
     .replace(/'/g,'&#039;');
+}
+
+  function buildPrefilledFormUrl(visitor) {
+
+  const params = new URLSearchParams();
+
+  params.set(
+    'usp',
+    'pp_url'
+  );
+
+  params.set(
+    'entry.481488761',
+    visitor.name || ''
+  );
+
+  params.set(
+    'entry.1770173014',
+    visitor.company || ''
+  );
+
+  params.set(
+    'entry.1222968948',
+    visitor.email || ''
+  );
+
+  return (
+    FORM_BASE_URL +
+    '?' +
+    params.toString()
+  );
+
 }
 
 loadVisitor();
