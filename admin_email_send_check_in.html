@@ -3,244 +3,1158 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>Αποστολή Check-in Email</title>
+
   <style>
-    * { box-sizing: border-box; }
-    body { margin: 0; font-family: Arial, Helvetica, sans-serif; background: #f4f6f8; color: #1f2937; }
-    .wrap { max-width: 760px; margin: 32px auto; padding: 16px; }
-    .card { background: #fff; border-radius: 16px; box-shadow: 0 8px 28px rgba(0,0,0,.08); overflow: hidden; }
-    .header { padding: 22px 24px; border-bottom: 1px solid #e5e7eb; text-align: center; }
-    .header img { max-width: 210px; max-height: 80px; object-fit: contain; margin-bottom: 12px; }
-    .header h1 { margin: 0; font-size: 22px; }
-    .content { padding: 24px; }
-    .field { margin-bottom: 18px; }
-    .label { font-size: 12px; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: .05em; margin-bottom: 5px; }
-    .value { font-size: 17px; font-weight: 600; word-break: break-word; }
-    .value.small { font-size: 14px; font-weight: 400; font-family: monospace; background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 8px; padding: 10px; }
-    .status { padding: 12px 14px; border-radius: 10px; font-weight: 700; text-align: center; margin: 22px 0; background: #f3f4f6; }
-    .status.sent { background: #ecfdf5; color: #047857; }
-    .status.pending { background: #fff7ed; color: #c2410c; }
-    .send-btn { width: 100%; border: 0; border-radius: 10px; padding: 15px 18px; font-size: 16px; font-weight: 700; cursor: pointer; background: #111827; color: #fff; margin-bottom: 18px; }
-    .send-btn:disabled { opacity: .5; cursor: not-allowed; }
-    .nav { display: flex; gap: 12px; justify-content: space-between; }
-    .nav button { flex: 1; border: 1px solid #d1d5db; background: #fff; border-radius: 10px; padding: 12px; font-size: 15px; font-weight: 700; cursor: pointer; }
-    .nav button:disabled { opacity: .4; cursor: not-allowed; }
-    .counter { text-align: center; margin-top: 18px; font-weight: 700; color: #6b7280; }
-    .message { margin-top: 16px; text-align: center; font-size: 14px; color: #6b7280; }
-    .error { color: #b91c1c; font-weight: 700; }
-    @media (max-width: 600px) { .wrap { margin: 10px auto; padding: 10px; } .content { padding: 18px; } .nav { flex-direction: column; } }
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f4f6f8;
+      color: #1f2937;
+    }
+
+    .wrap {
+      max-width: 1180px;
+      margin: 32px auto;
+      padding: 16px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 8px 28px rgba(0,0,0,.08);
+      overflow: hidden;
+    }
+
+    .header {
+      padding: 22px 24px;
+      border-bottom: 1px solid #e5e7eb;
+      text-align: center;
+    }
+
+    .header img {
+      max-width: 210px;
+      max-height: 80px;
+      object-fit: contain;
+      margin-bottom: 12px;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 22px;
+    }
+
+    .content {
+      padding: 24px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-bottom: 22px;
+    }
+
+    .stat {
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+      background: #f9fafb;
+    }
+
+    .stat-number {
+      font-size: 28px;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: #6b7280;
+      text-transform: uppercase;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .filter-btn {
+      border: 1px solid #d1d5db;
+      background: #fff;
+      border-radius: 9px;
+      padding: 10px 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .filter-btn.active {
+      background: #111827;
+      color: #fff;
+      border-color: #111827;
+    }
+
+    .search-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .search-input {
+      flex: 1;
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-size: 15px;
+    }
+
+    .batch-btn {
+      border: 0;
+      border-radius: 10px;
+      padding: 12px 18px;
+      background: #111827;
+      color: #fff;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .batch-btn:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 900px;
+    }
+
+    th,
+    td {
+      padding: 12px 10px;
+      border-bottom: 1px solid #e5e7eb;
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    th {
+      background: #f9fafb;
+      font-size: 12px;
+      text-transform: uppercase;
+      color: #6b7280;
+    }
+
+    td {
+      font-size: 14px;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 6px 9px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .status-sent {
+      background: #ecfdf5;
+      color: #047857;
+    }
+
+    .status-pending {
+      background: #fff7ed;
+      color: #c2410c;
+    }
+
+    .status-error {
+      background: #fef2f2;
+      color: #b91c1c;
+    }
+
+    .action-btn {
+      border: 0;
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+      background: #111827;
+      color: #fff;
+    }
+
+    .action-btn.resend {
+      background: #2563eb;
+    }
+
+    .action-btn.retry {
+      background: #b91c1c;
+    }
+
+    .action-btn:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+    }
+
+    .message {
+      margin-top: 16px;
+      text-align: center;
+      font-size: 14px;
+      color: #6b7280;
+    }
+
+    .error {
+      color: #b91c1c;
+      font-weight: 700;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px 20px;
+      font-weight: 700;
+      color: #6b7280;
+    }
+
+    @media (max-width: 800px) {
+      .stats {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .search-row {
+        flex-direction: column;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .wrap {
+        margin: 10px auto;
+        padding: 10px;
+      }
+
+      .content {
+        padding: 16px;
+      }
+
+      .stats {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
   </style>
 </head>
+
 <body>
+
 <div class="wrap">
+
   <div class="card">
+
     <div class="header">
-      <img src="zoom_logo_210426.png" alt="Logo">
-      <h1>Αποστολή Check-in Email</h1>
+
+      <img
+        src="zoom_logo_210426.png"
+        alt="Logo"
+      >
+
+      <h1>
+        Αποστολή Check-in Email
+      </h1>
+
     </div>
+
     <div class="content">
-      <div class="field"><div class="label">Κωδικός</div><div class="value" id="code">—</div></div>
-      <div class="field"><div class="label">Επισκέπτης</div><div class="value" id="name">—</div></div>
-      <div class="field"><div class="label">Εταιρεία / Φορέας</div><div class="value" id="company">—</div></div>
-      <div class="field"><div class="label">Email</div><div class="value" id="email">—</div></div>
-      <div class="field"><div class="label">Token</div><div class="value small" id="token">—</div></div>
-      <div class="field"><div class="label">Check-in Link</div><div class="value small" id="checkinLink">—</div></div>
-      <div id="statusBox" class="status pending">Φόρτωση...</div>
-      <button id="sendBtn" class="send-btn" type="button" disabled>ΣΤΕΙΛΕ E-MAIL</button>
-      <div class="nav">
-        <button id="prevBtn" type="button">← ΠΡΟΗΓΟΥΜΕΝΟ</button>
-        <button id="nextBtn" type="button">ΕΠΟΜΕΝΟ →</button>
+
+      <div class="stats">
+
+        <div class="stat">
+          <div
+            class="stat-number"
+            id="totalStat"
+          >
+            —
+          </div>
+
+          <div class="stat-label">
+            Σύνολο
+          </div>
+        </div>
+
+
+        <div class="stat">
+          <div
+            class="stat-number"
+            id="sentStat"
+          >
+            —
+          </div>
+
+          <div class="stat-label">
+            Στάλθηκαν
+          </div>
+        </div>
+
+
+        <div class="stat">
+          <div
+            class="stat-number"
+            id="pendingStat"
+          >
+            —
+          </div>
+
+          <div class="stat-label">
+            Δεν στάλθηκαν
+          </div>
+        </div>
+
+
+        <div class="stat">
+          <div
+            class="stat-number"
+            id="errorStat"
+          >
+            —
+          </div>
+
+          <div class="stat-label">
+            Απέτυχαν
+          </div>
+        </div>
+
       </div>
-      <div class="counter" id="counter">— / —</div>
-      <div class="message" id="message"></div>
+
+
+      <div class="toolbar">
+
+        <button
+          class="filter-btn active"
+          data-filter="ALL"
+          type="button"
+        >
+          ΟΛΟΙ
+        </button>
+
+        <button
+          class="filter-btn"
+          data-filter="PENDING"
+          type="button"
+        >
+          ΔΕΝ ΣΤΑΛΘΗΚΑΝ
+        </button>
+
+        <button
+          class="filter-btn"
+          data-filter="SENT"
+          type="button"
+        >
+          ΣΤΑΛΘΗΚΑΝ
+        </button>
+
+        <button
+          class="filter-btn"
+          data-filter="ERROR"
+          type="button"
+        >
+          ΑΠΕΤΥΧΑΝ
+        </button>
+
+      </div>
+
+
+      <div class="search-row">
+
+        <input
+          id="searchInput"
+          class="search-input"
+          type="text"
+          placeholder="Αναζήτηση με όνομα, email, εταιρεία ή κωδικό..."
+        >
+
+        <button
+          id="batchBtn"
+          class="batch-btn"
+          type="button"
+          disabled
+        >
+          ΣΤΕΙΛΕ ΤΑ ΕΠΟΜΕΝΑ 30
+        </button>
+
+      </div>
+
+
+      <div class="table-wrap">
+
+        <table>
+
+          <thead>
+            <tr>
+              <th>Κωδικός</th>
+              <th>Όνομα</th>
+              <th>Εταιρεία</th>
+              <th>Email</th>
+              <th>Status</th>
+              <th>Ημερομηνία</th>
+              <th>Ενέργεια</th>
+            </tr>
+          </thead>
+
+          <tbody id="visitorTableBody">
+
+            <tr>
+              <td colspan="7">
+                <div class="loading">
+                  Φόρτωση...
+                </div>
+              </td>
+            </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+
+      <div
+        class="message"
+        id="message"
+      ></div>
+
     </div>
+
   </div>
+
 </div>
+
+
 <script>
-  // ΒΑΛΕ ΕΔΩ ΤΟ URL ΤΟΥ PRE-CHECKIN WEB APP ΠΟΥ ΤΕΛΕΙΩΝΕΙ ΣΕ /exec
-  const API_URL = 'https://script.google.com/macros/s/AKfycbzYDoinhNsl0oXgNCzdSTOmp0FYwJ1HDmQYsxFbhIBu5m-YWlz9OFrFDXisXyWxDPEF/exec';
 
-  let currentIndex = 1;
-  let totalVisitors = 1;
-  let currentVisitor = null;
+const API_URL =
+  'https://script.google.com/macros/s/AKfycbzYDoinhNsl0oXgNCzdSTOmp0FYwJ1HDmQYsxFbhIBu5m-YWlz9OFrFDXisXyWxDPEF/exec';
 
-  const codeEl = document.getElementById('code');
-  const nameEl = document.getElementById('name');
-  const companyEl = document.getElementById('company');
-  const emailEl = document.getElementById('email');
-  const tokenEl = document.getElementById('token');
-  const checkinLinkEl = document.getElementById('checkinLink');
-  const statusBox = document.getElementById('statusBox');
-  const sendBtn = document.getElementById('sendBtn');
-  const prevBtn = document.getElementById('prevBtn');
-  const nextBtn = document.getElementById('nextBtn');
-  const counterEl = document.getElementById('counter');
-  const messageEl = document.getElementById('message');
 
-  function jsonp(params) {
-    return new Promise((resolve, reject) => {
-      const callbackName = 'cb_' + Date.now() + '_' + Math.floor(Math.random() * 100000);
-      const script = document.createElement('script');
-      const query = new URLSearchParams({ ...params, callback: callbackName });
-      const timeout = setTimeout(() => { cleanup(); reject(new Error('Timeout επικοινωνίας με το Apps Script')); }, 15000);
-      function cleanup() { clearTimeout(timeout); try { delete window[callbackName]; } catch(e) {} if (script.parentNode) script.parentNode.removeChild(script); }
-      window[callbackName] = function(data) { cleanup(); resolve(data); };
-      script.onerror = function() { cleanup(); reject(new Error('Αποτυχία φόρτωσης δεδομένων')); };
-      script.src = API_URL + '?' + query.toString();
-      document.body.appendChild(script);
-    });
-  }
+let visitors = [];
 
-  async function loadVisitor(index) {
-    messageEl.textContent = '';
-    sendBtn.disabled = true;
-    statusBox.className = 'status pending';
-    statusBox.textContent = 'Φόρτωση...';
+let currentFilter =
+  'ALL';
 
-    try {
-      const data = await jsonp({ action: 'getMailVisitor', index: index });
-      if (!data.success) throw new Error(data.message || 'Άγνωστο σφάλμα');
 
-      currentVisitor = data;
-      currentIndex = data.index;
-      totalVisitors = data.total;
-      codeEl.textContent = data.code || '—';
-      nameEl.textContent = data.name || '—';
-      companyEl.textContent = data.company || '—';
-      emailEl.textContent = data.email || '—';
-      tokenEl.textContent = data.token || '—';
-      checkinLinkEl.textContent = data.checkinLink || '—';
-      counterEl.textContent = currentIndex + ' / ' + totalVisitors;
-      prevBtn.disabled = currentIndex <= 1;
-      nextBtn.disabled = currentIndex >= totalVisitors;
+const totalStat =
+  document.getElementById(
+    'totalStat'
+  );
 
-      if (String(data.sendMail || '').toUpperCase() === 'SENT') {
-        statusBox.className = 'status sent';
-        statusBox.innerHTML = '✓ ΤΟ EMAIL ΕΧΕΙ ΣΤΑΛΕΙ' + (data.sendMailAt ? '<br><small>' + escapeHtml(data.sendMailAt) + '</small>' : '');
-        sendBtn.textContent = 'EMAIL ΗΔΗ ΣΤΑΛΜΕΝΟ';
-        sendBtn.disabled = true;
-      } else {
-        statusBox.className = 'status pending';
-        statusBox.textContent = 'ΔΕΝ ΕΧΕΙ ΣΤΑΛΕΙ';
-        sendBtn.textContent = 'ΣΤΕΙΛΕ E-MAIL';
-        // Θα ενεργοποιηθεί στο επόμενο βήμα.
-        sendBtn.disabled = false;
+const sentStat =
+  document.getElementById(
+    'sentStat'
+  );
+
+const pendingStat =
+  document.getElementById(
+    'pendingStat'
+  );
+
+const errorStat =
+  document.getElementById(
+    'errorStat'
+  );
+
+const searchInput =
+  document.getElementById(
+    'searchInput'
+  );
+
+const batchBtn =
+  document.getElementById(
+    'batchBtn'
+  );
+
+const visitorTableBody =
+  document.getElementById(
+    'visitorTableBody'
+  );
+
+const messageEl =
+  document.getElementById(
+    'message'
+  );
+
+
+function jsonp(params) {
+
+  return new Promise(
+    (resolve, reject) => {
+
+      const callbackName =
+        'cb_' +
+        Date.now() +
+        '_' +
+        Math.floor(
+          Math.random() * 100000
+        );
+
+
+      const script =
+        document.createElement(
+          'script'
+        );
+
+
+      const query =
+        new URLSearchParams({
+          ...params,
+          callback:
+            callbackName
+        });
+
+
+      const timeout =
+        setTimeout(
+          () => {
+
+            cleanup();
+
+            reject(
+              new Error(
+                'Timeout επικοινωνίας με το Apps Script'
+              )
+            );
+
+          },
+          20000
+        );
+
+
+      function cleanup() {
+
+        clearTimeout(
+          timeout
+        );
+
+        try {
+
+          delete window[
+            callbackName
+          ];
+
+        } catch(e) {}
+
+
+        if (
+          script.parentNode
+        ) {
+
+          script.parentNode
+            .removeChild(
+              script
+            );
+
+        }
+
       }
-    } catch (error) {
-      currentVisitor = null;
-      statusBox.className = 'status';
-      statusBox.textContent = 'ΣΦΑΛΜΑ';
-      messageEl.innerHTML = '<span class="error">' + escapeHtml(error.message) + '</span>';
+
+
+      window[
+        callbackName
+      ] =
+        function(data) {
+
+          cleanup();
+
+          resolve(
+            data
+          );
+
+        };
+
+
+      script.onerror =
+        function() {
+
+          cleanup();
+
+          reject(
+            new Error(
+              'Αποτυχία φόρτωσης δεδομένων'
+            )
+          );
+
+        };
+
+
+      script.src =
+        API_URL +
+        '?' +
+        query.toString();
+
+
+      document.body
+        .appendChild(
+          script
+        );
+
     }
+  );
+
+}
+
+
+async function loadVisitors() {
+
+  messageEl.textContent =
+    '';
+
+
+  try {
+
+    const data =
+      await jsonp({
+        action:
+          'getMailVisitors'
+      });
+
+
+    if (
+      !data ||
+      !data.success
+    ) {
+
+      throw new Error(
+        data &&
+        data.message
+          ? data.message
+          : 'Άγνωστο σφάλμα'
+      );
+
+    }
+
+
+    visitors =
+      Array.isArray(
+        data.visitors
+      )
+        ? data.visitors
+        : [];
+
+
+    totalStat.textContent =
+      data.total || 0;
+
+    sentStat.textContent =
+      data.sent || 0;
+
+    pendingStat.textContent =
+      data.pending || 0;
+
+    errorStat.textContent =
+      data.errors || 0;
+
+
+    renderVisitors();
+
+  } catch(error) {
+
+    visitorTableBody.innerHTML =
+      '<tr>' +
+      '<td colspan="7">' +
+      '<div class="loading error">' +
+      escapeHtml(
+        error.message
+      ) +
+      '</div>' +
+      '</td>' +
+      '</tr>';
+
   }
 
-  prevBtn.addEventListener('click', () => { if (currentIndex > 1) loadVisitor(currentIndex - 1); });
-  nextBtn.addEventListener('click', () => { if (currentIndex < totalVisitors) loadVisitor(currentIndex + 1); });
- sendBtn.addEventListener('click', async () => {
+}
 
-  if (!currentVisitor) {
+
+function renderVisitors() {
+
+  const search =
+    searchInput.value
+      .trim()
+      .toLowerCase();
+
+
+  const filtered =
+    visitors.filter(
+      visitor => {
+
+        const status =
+          String(
+            visitor.sendMail || ''
+          )
+            .trim()
+            .toUpperCase();
+
+
+        if (
+          currentFilter === 'SENT' &&
+          status !== 'SENT'
+        ) {
+
+          return false;
+
+        }
+
+
+        if (
+          currentFilter === 'ERROR' &&
+          status !== 'ERROR'
+        ) {
+
+          return false;
+
+        }
+
+
+        if (
+          currentFilter === 'PENDING' &&
+          (
+            status === 'SENT' ||
+            status === 'ERROR'
+          )
+        ) {
+
+          return false;
+
+        }
+
+
+        if (search) {
+
+          const haystack =
+            [
+              visitor.code,
+              visitor.name,
+              visitor.company,
+              visitor.email
+            ]
+              .join(' ')
+              .toLowerCase();
+
+
+          if (
+            !haystack.includes(
+              search
+            )
+          ) {
+
+            return false;
+
+          }
+
+        }
+
+
+        return true;
+
+      }
+    );
+
+
+  if (
+    filtered.length === 0
+  ) {
+
+    visitorTableBody.innerHTML =
+      '<tr>' +
+      '<td colspan="7">' +
+      '<div class="loading">' +
+      'Δεν βρέθηκαν εγγραφές.' +
+      '</div>' +
+      '</td>' +
+      '</tr>';
+
+    return;
+
+  }
+
+
+  visitorTableBody.innerHTML =
+    filtered
+      .map(
+        visitor =>
+          buildVisitorRow(
+            visitor
+          )
+      )
+      .join('');
+
+}
+
+
+function buildVisitorRow(
+  visitor
+) {
+
+  const status =
+    String(
+      visitor.sendMail || ''
+    )
+      .trim()
+      .toUpperCase();
+
+
+  let statusHtml = '';
+
+  let actionHtml = '';
+
+
+  if (
+    status === 'SENT'
+  ) {
+
+    statusHtml =
+      '<span class="status-badge status-sent">' +
+      'SENT' +
+      '</span>';
+
+
+    actionHtml =
+      '<button ' +
+      'class="action-btn resend" ' +
+      'type="button" ' +
+      'onclick="resendVisitor(' +
+      visitor.index +
+      ')">' +
+      'ΕΠΑΝΑΠΟΣΤΟΛΗ' +
+      '</button>';
+
+  } else if (
+    status === 'ERROR'
+  ) {
+
+    statusHtml =
+      '<span class="status-badge status-error">' +
+      'ERROR' +
+      '</span>';
+
+
+    actionHtml =
+      '<button ' +
+      'class="action-btn retry" ' +
+      'type="button" ' +
+      'onclick="sendVisitor(' +
+      visitor.index +
+      ')">' +
+      'ΞΑΝΑΠΡΟΣΠΑΘΗΣΕ' +
+      '</button>';
+
+  } else {
+
+    statusHtml =
+      '<span class="status-badge status-pending">' +
+      'PENDING' +
+      '</span>';
+
+
+    actionHtml =
+      '<button ' +
+      'class="action-btn" ' +
+      'type="button" ' +
+      'onclick="sendVisitor(' +
+      visitor.index +
+      ')">' +
+      'ΣΤΕΙΛΕ' +
+      '</button>';
+
+  }
+
+
+  return (
+    '<tr>' +
+
+      '<td>' +
+        escapeHtml(
+          visitor.code || ''
+        ) +
+      '</td>' +
+
+      '<td>' +
+        escapeHtml(
+          visitor.name || ''
+        ) +
+      '</td>' +
+
+      '<td>' +
+        escapeHtml(
+          visitor.company || ''
+        ) +
+      '</td>' +
+
+      '<td>' +
+        escapeHtml(
+          visitor.email || ''
+        ) +
+      '</td>' +
+
+      '<td>' +
+        statusHtml +
+      '</td>' +
+
+      '<td>' +
+        escapeHtml(
+          visitor.sendMailAt || '—'
+        ) +
+      '</td>' +
+
+      '<td>' +
+        actionHtml +
+      '</td>' +
+
+    '</tr>'
+  );
+
+}
+
+
+async function sendVisitor(
+  index
+) {
+
+  const visitor =
+    visitors.find(
+      item =>
+        Number(item.index) ===
+        Number(index)
+    );
+
+
+  if (!visitor) {
     return;
   }
 
-  const ok = confirm(
-    'Να σταλεί email στον/στην:\n\n' +
-    currentVisitor.name +
-    '\n' +
-    currentVisitor.email +
-    '\n\nΘέλεις να συνεχίσεις;'
-  );
+
+  const ok =
+    confirm(
+      'Να σταλεί email στον/στην:\n\n' +
+      visitor.name +
+      '\n' +
+      visitor.email +
+      '\n\nΘέλεις να συνεχίσεις;'
+    );
+
 
   if (!ok) {
     return;
   }
 
-  sendBtn.disabled = true;
-  sendBtn.textContent = 'ΑΠΟΣΤΟΛΗ...';
 
-  statusBox.className = 'status pending';
-  statusBox.textContent = 'ΓΙΝΕΤΑΙ ΑΠΟΣΤΟΛΗ...';
+  messageEl.textContent =
+    'Γίνεται αποστολή προς ' +
+    visitor.email +
+    '...';
 
-  messageEl.textContent = '';
 
   try {
 
-    const result = await jsonp({
-      action: 'sendZohoCheckinEmail',
-      index: currentIndex
-    });
+    const result =
+      await jsonp({
 
-    if (!result.success) {
+        action:
+          'sendZohoCheckinEmail',
 
-      if (result.alreadySent) {
+        index:
+          visitor.index
 
-        statusBox.className = 'status sent';
-        statusBox.textContent = '✓ ΤΟ EMAIL ΕΧΕΙ ΗΔΗ ΣΤΑΛΕΙ';
+      });
 
-        sendBtn.textContent = 'EMAIL ΗΔΗ ΣΤΑΛΜΕΝΟ';
-        sendBtn.disabled = true;
+
+    if (
+      !result ||
+      !result.success
+    ) {
+
+      if (
+        result &&
+        result.alreadySent
+      ) {
+
+        messageEl.textContent =
+          'Το email έχει ήδη σταλεί.';
+
+        await loadVisitors();
 
         return;
+
       }
 
+
       throw new Error(
-        result.message || 'Αποτυχία αποστολής'
+        result &&
+        result.message
+          ? result.message
+          : 'Αποτυχία αποστολής'
       );
+
     }
 
 
-    statusBox.className = 'status sent';
-
-    statusBox.innerHTML =
-      '✓ ΤΟ EMAIL ΕΧΕΙ ΣΤΑΛΕΙ' +
-      (result.sendMailAt
-        ? '<br><small>' +
-          escapeHtml(result.sendMailAt) +
-          '</small>'
-        : '');
-
-
-    sendBtn.textContent =
-      'EMAIL ΗΔΗ ΣΤΑΛΜΕΝΟ';
-
-    sendBtn.disabled = true;
-
-
     messageEl.textContent =
-      'Η αποστολή ολοκληρώθηκε επιτυχώς.';
+      '✓ Το email στάλθηκε επιτυχώς στον/στην ' +
+      visitor.name +
+      '.';
 
 
-    currentVisitor.sendMail =
-      'SENT';
+    await loadVisitors();
 
-    currentVisitor.sendMailAt =
-      result.sendMailAt || '';
 
-  } catch (error) {
-
-    statusBox.className =
-      'status pending';
-
-    statusBox.textContent =
-      'ΔΕΝ ΣΤΑΛΘΗΚΕ';
+  } catch(error) {
 
     messageEl.innerHTML =
       '<span class="error">' +
-      escapeHtml(error.message) +
+      escapeHtml(
+        error.message
+      ) +
       '</span>';
 
-    sendBtn.textContent =
-      'ΣΤΕΙΛΕ E-MAIL';
-
-    sendBtn.disabled = false;
   }
 
-});
+}
 
-  function escapeHtml(value) {
-    return String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+
+function resendVisitor(
+  index
+) {
+
+  const visitor =
+    visitors.find(
+      item =>
+        Number(item.index) ===
+        Number(index)
+    );
+
+
+  if (!visitor) {
+    return;
   }
 
-  loadVisitor(1);
+
+  alert(
+    'Η λειτουργία επαναποστολής θα ενεργοποιηθεί στο επόμενο βήμα.'
+  );
+
+}
+
+
+document
+  .querySelectorAll(
+    '.filter-btn'
+  )
+  .forEach(
+    button => {
+
+      button.addEventListener(
+        'click',
+        () => {
+
+          currentFilter =
+            button.dataset.filter;
+
+
+          document
+            .querySelectorAll(
+              '.filter-btn'
+            )
+            .forEach(
+              btn =>
+                btn.classList
+                  .remove(
+                    'active'
+                  )
+            );
+
+
+          button.classList
+            .add(
+              'active'
+            );
+
+
+          renderVisitors();
+
+        }
+      );
+
+    }
+  );
+
+
+searchInput
+  .addEventListener(
+    'input',
+    renderVisitors
+  );
+
+
+batchBtn
+  .addEventListener(
+    'click',
+    () => {
+
+      alert(
+        'Η αποστολή των επόμενων 30 θα ενεργοποιηθεί στο επόμενο βήμα.'
+      );
+
+    }
+  );
+
+
+function escapeHtml(
+  value
+) {
+
+  return String(
+    value
+  )
+    .replace(
+      /&/g,
+      '&amp;'
+    )
+    .replace(
+      /</g,
+      '&lt;'
+    )
+    .replace(
+      />/g,
+      '&gt;'
+    )
+    .replace(
+      /"/g,
+      '&quot;'
+    )
+    .replace(
+      /'/g,
+      '&#039;'
+    );
+
+}
+
+
+loadVisitors();
+
 </script>
+
 </body>
 </html>
