@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="el">
 
@@ -69,19 +70,18 @@
     }
 
 
-
     h1 {
 
-  margin: 0;
+      margin: 0;
 
-  font-size: 22px;
-  font-weight: 800;
+      font-size: 22px;
+      font-weight: 800;
 
-  line-height: 1.25;
+      line-height: 1.25;
 
-  letter-spacing: -0.3px;
+      letter-spacing: -0.3px;
 
-}
+    }
 
 
     .subtitle {
@@ -116,7 +116,7 @@
 
 
     /* --------------------------------
-       DEVICE
+       DEVICE / CAMERA SELECT
     -------------------------------- */
 
     .field-label {
@@ -135,7 +135,8 @@
     }
 
 
-    #device {
+    #device,
+    #cameraSelect {
 
       width: 100%;
 
@@ -152,12 +153,14 @@
       background: #f9fafb;
 
       margin-bottom: 18px;
-       cursor: pointer;
+
+      cursor: pointer;
 
     }
 
 
-    #device:focus {
+    #device:focus,
+    #cameraSelect:focus {
 
       border-color: #6b7280;
 
@@ -498,25 +501,25 @@
        MOBILE
     -------------------------------- */
 
-   @media (max-width: 480px) {
+    @media (max-width: 480px) {
 
-  body {
-    padding: 14px;
-  }
+      body {
+        padding: 14px;
+      }
 
-  .card {
-    padding: 16px;
-  }
+      .card {
+        padding: 16px;
+      }
 
-  h1 {
-    font-size: 19px;
-  }
+      h1 {
+        font-size: 19px;
+      }
 
-  .camera-wrapper {
-    min-height: 240px;
-  }
+      .camera-wrapper {
+        min-height: 240px;
+      }
 
-}
+    }
 
   </style>
 
@@ -533,15 +536,15 @@
 
   <div class="header">
 
-  <h1>
-    Ο ΝΕΟΣ ΚΩΔΙΚΑΣ ΤΟΠΙΚΗΣ ΑΥΤΟΔΙΟΙΚΗΣΗΣ ΣΤΗΝ ΠΡΑΞΗ 25/9/2026
-  </h1>
+    <h1>
+      Ο ΝΕΟΣ ΚΩΔΙΚΑΣ ΤΟΠΙΚΗΣ ΑΥΤΟΔΙΟΙΚΗΣΗΣ ΣΤΗΝ ΠΡΑΞΗ 25/9/2026
+    </h1>
 
-  <div class="subtitle">
-    Σύστημα καταγραφής παρουσίας
+    <div class="subtitle">
+      Σύστημα καταγραφής παρουσίας
+    </div>
+
   </div>
-
-</div>
 
 
 
@@ -559,13 +562,30 @@
 
 
     <select id="device">
-  <option value="Παρουσίες" selected>Παρουσίες</option>
-  <option value="Νέο Μοντέλο Διοίκησης">Νέο Μοντέλο Διοίκησης</option>
-  <option value="Οικονομική Διοίκηση">Οικονομική Διοίκηση</option>
-  <option value="Περιουσίας και εσόδων">Περιουσίας και εσόδων</option>
-  <option value="Νομικά πρόσωπα">Νομικά πρόσωπα</option>
-  <option value="Λογιστική">Λογιστική</option>
-</select>
+      <option value="Παρουσίες" selected>Παρουσίες</option>
+      <option value="Νέο Μοντέλο Διοίκησης">Νέο Μοντέλο Διοίκησης</option>
+      <option value="Οικονομική Διοίκηση">Οικονομική Διοίκηση</option>
+      <option value="Περιουσίας και εσόδων">Περιουσίας και εσόδων</option>
+      <option value="Νομικά πρόσωπα">Νομικά πρόσωπα</option>
+      <option value="Λογιστική">Λογιστική</option>
+    </select>
+
+
+    <!-- CAMERA SELECT -->
+
+    <label
+      class="field-label"
+      for="cameraSelect"
+    >
+      Κάμερα
+    </label>
+
+    <select
+      id="cameraSelect"
+      onchange="changeCamera()"
+    >
+      <option value="">Αυτόματη επιλογή</option>
+    </select>
 
 
 
@@ -681,9 +701,17 @@ let cameraId = null;
 let scannerRunning = false;
 
 let scanLocked = false;
+
 let visitorsCache = {};
+
 let visitorsLoaded = false;
 
+let availableCameras = [];
+
+
+// ==========================================
+// LOAD VISITORS
+// ==========================================
 
 function loadVisitors() {
 
@@ -768,19 +796,12 @@ function loadVisitors() {
 
 }
 
-  
+
 // ==========================================
-// ΒΡΕΣ ΑΥΤΟΜΑΤΑ CAMERA 0
+// ΒΡΕΣ ΔΙΑΘΕΣΙΜΕΣ ΚΑΜΕΡΕΣ
 // ==========================================
 
-
-
-  async function getCamera() {
-
-  if (cameraId) {
-    return cameraId;
-  }
-
+async function getCamera() {
 
   const cameras =
     await Html5Qrcode.getCameras();
@@ -795,13 +816,98 @@ function loadVisitors() {
   }
 
 
-  // CAMERA 0
-  cameraId = cameras[1].id;
+  availableCameras = cameras;
+
+
+  const cameraSelect =
+    document.getElementById("cameraSelect");
+
+
+  const previousSelection =
+    cameraSelect.value;
+
+
+  cameraSelect.innerHTML =
+    '<option value="">Αυτόματη επιλογή</option>';
+
+
+  cameras.forEach(
+    function(camera, index) {
+
+      const option =
+        document.createElement("option");
+
+      option.value =
+        camera.id;
+
+      option.textContent =
+        camera.label ||
+        ("Κάμερα " + (index + 1));
+
+      cameraSelect.appendChild(option);
+
+    }
+  );
+
+
+  // Αν υπήρχε ήδη επιλεγμένη κάμερα
+  // και εξακολουθεί να υπάρχει, την κρατάμε.
+
+  if (
+    previousSelection &&
+    cameras.some(
+      camera => camera.id === previousSelection
+    )
+  ) {
+
+    cameraSelect.value =
+      previousSelection;
+
+    cameraId =
+      previousSelection;
+
+  }
+
+  // Αν έχει ήδη αποθηκευτεί cameraId
+  // και εξακολουθεί να υπάρχει, την κρατάμε.
+
+  else if (
+    cameraId &&
+    cameras.some(
+      camera => camera.id === cameraId
+    )
+  ) {
+
+    cameraSelect.value =
+      cameraId;
+
+  }
+
+  // Διαφορετικά χρησιμοποιούμε την πρώτη
+  // διαθέσιμη κάμερα.
+
+  else {
+
+    cameraId =
+      cameras[0].id;
+
+    cameraSelect.value =
+      cameraId;
+
+  }
+
+
+  const selectedCamera =
+    cameras.find(
+      camera => camera.id === cameraId
+    );
 
 
   console.log(
     "Camera selected:",
-    cameras[1].label,
+    selectedCamera
+      ? selectedCamera.label
+      : cameraId,
     cameraId
   );
 
@@ -810,6 +916,146 @@ function loadVisitors() {
 
 }
 
+
+// ==========================================
+// ΑΛΛΑΓΗ ΚΑΜΕΡΑΣ
+// ==========================================
+
+async function changeCamera() {
+
+  const cameraSelect =
+    document.getElementById("cameraSelect");
+
+  const newCameraId =
+    cameraSelect.value;
+
+
+  // Αν επιλεγεί "Αυτόματη επιλογή",
+  // χρησιμοποιούμε την πρώτη διαθέσιμη.
+
+  if (!newCameraId) {
+
+    if (availableCameras.length > 0) {
+
+      cameraId =
+        availableCameras[0].id;
+
+    } else {
+
+      cameraId =
+        null;
+
+    }
+
+  } else {
+
+    cameraId =
+      newCameraId;
+
+  }
+
+
+  // Αν ο scanner δεν τρέχει,
+  // απλώς κρατάμε την επιλογή.
+
+  if (!scannerRunning) {
+    return;
+  }
+
+
+  const result =
+    document.getElementById("result");
+
+  const placeholder =
+    document.getElementById("cameraPlaceholder");
+
+  const scanFrame =
+    document.getElementById("scanFrame");
+
+
+  result.className =
+    "status-loading";
+
+  result.innerHTML =
+    "Αλλαγή κάμερας...";
+
+
+  scanFrame.style.display =
+    "none";
+
+
+  try {
+
+    await html5QrCode.stop();
+
+    scannerRunning =
+      false;
+
+
+    await html5QrCode.start(
+
+      cameraId,
+
+      {
+
+        fps: 10,
+
+        qrbox: {
+          width: 220,
+          height: 220
+        }
+
+      },
+
+      onScanSuccess,
+
+      function() {
+        // Αγνοούμε όσο ψάχνει QR
+      }
+
+    );
+
+
+    scannerRunning =
+      true;
+
+
+    placeholder.style.display =
+      "none";
+
+
+    scanFrame.style.display =
+      "block";
+
+
+    result.className =
+      "status-waiting";
+
+
+    result.innerHTML =
+      "Σκανάρετε το QR του επισκέπτη";
+
+
+  } catch (error) {
+
+    console.error(error);
+
+
+    scannerRunning =
+      false;
+
+
+    result.className =
+      "status-error";
+
+
+    result.innerHTML =
+      "<div class='result-title'>Σφάλμα κάμερας</div>" +
+      escapeHtml(error.message);
+
+  }
+
+}
 
 
 // ==========================================
@@ -935,7 +1181,7 @@ async function startScanner() {
 
     result.innerHTML =
       "<div class='result-title'>Σφάλμα κάμερας</div>" +
-      error.message;
+      escapeHtml(error.message);
 
 
     startButton.disabled =
@@ -952,7 +1198,6 @@ async function startScanner() {
   }
 
 }
-
 
 
 // ==========================================
@@ -1052,10 +1297,10 @@ async function onScanSuccess(decodedText) {
 }
 
 
-
 // ==========================================
 // SAVE TO GOOGLE SHEET
 // ==========================================
+
 function saveScan(code, device) {
 
   const callbackName =
@@ -1108,6 +1353,7 @@ function saveScan(code, device) {
             "<div class='result-time'>" +
             escapeHtml(response.timestamp) +
             "</div>";
+
         }
 
       } else {
@@ -1175,7 +1421,7 @@ function saveScan(code, device) {
 
 }
 
- 
+
 // ==========================================
 // ΝΕΟ SCAN
 // ==========================================
@@ -1198,7 +1444,6 @@ function newScan() {
   startScanner();
 
 }
-
 
 
 // ==========================================
@@ -1237,6 +1482,10 @@ function escapeHtml(value) {
 
 }
 
+
+// ==========================================
+// PAGE LOAD
+// ==========================================
 
 window.addEventListener(
   "load",
@@ -1280,7 +1529,6 @@ window.addEventListener(
   }
 );
 
-  
 
 </script>
 
