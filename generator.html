@@ -336,7 +336,68 @@ async function drawWalkinFront(canvas,person){
 }
 function createQrDataUrl(code){const qr=qrcode(0,"M");qr.addData(code);qr.make();return qr.createDataURL(10,3)}
 function rotateCanvas180(sourceCanvas){const rotated=document.createElement("canvas");rotated.width=sourceCanvas.width;rotated.height=sourceCanvas.height;const ctx=rotated.getContext("2d");ctx.translate(rotated.width,rotated.height);ctx.rotate(Math.PI);ctx.drawImage(sourceCanvas,0,0);return rotated}
-async function drawBack(canvas,person){const ctx=canvas.getContext("2d"),W=canvas.width,H=canvas.height;ctx.clearRect(0,0,W,H);ctx.fillStyle="#fff";ctx.fillRect(0,0,W,H);if(badgeType!=="visitor")drawRoleBand(ctx,W,H,"bottom");ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillStyle="#111827";const nameSize=fitText(ctx,person.name,760,45,30,800);ctx.font="800 "+nameSize+"px Arial, sans-serif";let y=70;for(const line of wrapText(ctx,person.name,760).slice(0,2)){ctx.fillText(line,W/2,y);y+=nameSize*1.08}const qrImg=await loadImage(createQrDataUrl(person.code)),qrSize=badgeType!=="visitor"?300:330,qrY=badgeType!=="visitor"?170:180;ctx.drawImage(qrImg,(W-qrSize)/2,qrY,qrSize,qrSize);ctx.fillStyle="#4b5563";ctx.font=badgeType!=="visitor"?"700 23px Arial, sans-serif":"700 26px Arial, sans-serif";ctx.fillText("ΣΑΡΩΣΗ ΚΑΤΑ ΤΗΝ ΕΙΣΟΔΟ",W/2,badgeType!=="visitor"?500:555)}
+async function drawWalkinBack(canvas,person){
+  const ctx=canvas.getContext("2d"),
+        W=canvas.width,
+        H=canvas.height;
+
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle="#fff";
+  ctx.fillRect(0,0,W,H);
+
+  /*
+   * QR CODE
+   */
+  const qrImg=await loadImage(
+    createQrDataUrl(person.code)
+  );
+
+  const qrSize=340;
+  const qrX=(W-qrSize)/2;
+  const qrY=90;
+
+  ctx.drawImage(
+    qrImg,
+    qrX,
+    qrY,
+    qrSize,
+    qrSize
+  );
+
+  /*
+   * Οδηγία σάρωσης
+   */
+  ctx.fillStyle="#4b5563";
+  ctx.textAlign="center";
+  ctx.textBaseline="middle";
+  ctx.font="700 26px Arial, sans-serif";
+
+  ctx.fillText(
+    "ΣΑΡΩΣΗ ΚΑΤΑ ΤΗΝ ΕΙΣΟΔΟ",
+    W/2,
+    500
+  );
+
+  /*
+   * CODE κάτω δεξιά
+   */
+  ctx.fillStyle="#6b7280";
+  ctx.textAlign="right";
+  ctx.font="600 18px Arial, sans-serif";
+
+  ctx.fillText(
+    person.code || "",
+    W-28,
+    H-22
+  );
+}
+  async function drawBack(canvas,person){if(badgeType==="walkin"){
+  await drawWalkinBack(
+    canvas,
+    person
+  );
+  return;
+}const ctx=canvas.getContext("2d"),W=canvas.width,H=canvas.height;ctx.clearRect(0,0,W,H);ctx.fillStyle="#fff";ctx.fillRect(0,0,W,H);if(badgeType!=="visitor")drawRoleBand(ctx,W,H,"bottom");ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillStyle="#111827";const nameSize=fitText(ctx,person.name,760,45,30,800);ctx.font="800 "+nameSize+"px Arial, sans-serif";let y=70;for(const line of wrapText(ctx,person.name,760).slice(0,2)){ctx.fillText(line,W/2,y);y+=nameSize*1.08}const qrImg=await loadImage(createQrDataUrl(person.code)),qrSize=badgeType!=="visitor"?300:330,qrY=badgeType!=="visitor"?170:180;ctx.drawImage(qrImg,(W-qrSize)/2,qrY,qrSize,qrSize);ctx.fillStyle="#4b5563";ctx.font=badgeType!=="visitor"?"700 23px Arial, sans-serif":"700 26px Arial, sans-serif";ctx.fillText("ΣΑΡΩΣΗ ΚΑΤΑ ΤΗΝ ΕΙΣΟΔΟ",W/2,badgeType!=="visitor"?500:555)}
 async function renderPreview(person){await drawFront(document.getElementById("frontPreview"),person);await drawBack(document.getElementById("backPreview"),person)}
 async function makeBadgeCanvas(person,side){const c=document.createElement("canvas");c.width=900;c.height=600;if(side==="front")await drawFront(c,person);else await drawBack(c,person);return c}
 async function generateSinglePdf(){if(!rows.length)return;generateSingleBtn.disabled=true;generateA4Btn.disabled=true;setStatus("Δημιουργία PDF 9×6...","working");try{const{jsPDF}=window.jspdf,pdf=new jsPDF({orientation:"landscape",unit:"mm",format:[90,60],compress:true});let firstPage=true;for(let i=0;i<rows.length;i++){const front=await makeBadgeCanvas(rows[i],"front");if(!firstPage)pdf.addPage([90,60],"landscape");firstPage=false;pdf.addImage(front.toDataURL("image/jpeg",.95),"JPEG",0,0,90,60,undefined,"FAST");const back=await makeBadgeCanvas(rows[i],"back");pdf.addPage([90,60],"landscape");pdf.addImage(back.toDataURL("image/jpeg",.95),"JPEG",0,0,90,60,undefined,"FAST")}pdf.save("qr_badges_9x6_"+(badgeType==="staff"?"staff":badgeType==="speaker"?"speakers":"visitors")+".pdf");setStatus("Έτοιμο PDF 9×6: "+rows.length+" καρτέλες.","success")}catch(err){setStatus("Σφάλμα: "+err.message,"error")}finally{generateSingleBtn.disabled=false;generateA4Btn.disabled=false}}
