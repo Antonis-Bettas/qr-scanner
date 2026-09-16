@@ -191,7 +191,7 @@ async function drawWalkinFront(canvas,person){
   ctx.fillStyle="#6b7280";
   ctx.textAlign="right";
   ctx.textBaseline="middle";
-  ctx.font="600 18px Arial, sans-serif";
+  ctx.font="700 28px Arial, sans-serif";
 
   ctx.fillText(
     person.code || "",
@@ -346,15 +346,29 @@ async function drawWalkinBack(canvas,person){
   ctx.fillRect(0,0,W,H);
 
   /*
+   * CODE στη θέση του ονόματος
+   */
+  ctx.fillStyle="#111827";
+  ctx.textAlign="center";
+  ctx.textBaseline="middle";
+  ctx.font="800 48px Arial, sans-serif";
+
+  ctx.fillText(
+    person.code || "",
+    W/2,
+    70
+  );
+
+  /*
    * QR CODE
    */
   const qrImg=await loadImage(
     createQrDataUrl(person.code)
   );
 
-  const qrSize=340;
+  const qrSize=330;
   const qrX=(W-qrSize)/2;
-  const qrY=90;
+  const qrY=145;
 
   ctx.drawImage(
     qrImg,
@@ -369,26 +383,12 @@ async function drawWalkinBack(canvas,person){
    */
   ctx.fillStyle="#4b5563";
   ctx.textAlign="center";
-  ctx.textBaseline="middle";
   ctx.font="700 26px Arial, sans-serif";
 
   ctx.fillText(
     "ΣΑΡΩΣΗ ΚΑΤΑ ΤΗΝ ΕΙΣΟΔΟ",
     W/2,
-    500
-  );
-
-  /*
-   * CODE κάτω δεξιά
-   */
-  ctx.fillStyle="#6b7280";
-  ctx.textAlign="right";
-  ctx.font="600 18px Arial, sans-serif";
-
-  ctx.fillText(
-    person.code || "",
-    W-28,
-    H-22
+    535
   );
 }
   async function drawBack(canvas,person){if(badgeType==="walkin"){
