@@ -127,7 +127,7 @@ function fileToDataUrl(file){return new Promise((resolve,reject)=>{const r=new F
 function loadImage(src){return new Promise((resolve,reject)=>{const img=new Image();img.onload=()=>resolve(img);img.onerror=reject;img.src=src})}
 function fitText(ctx,text,maxWidth,startPx,minPx,weight=700){let size=startPx;while(size>minPx){ctx.font=weight+" "+size+"px Arial, sans-serif";if(ctx.measureText(text).width<=maxWidth)break;size-=2}return size}
 function wrapText(ctx,text,maxWidth){const words=String(text).split(/\s+/),lines=[];let line="";for(const word of words){const test=line?line+" "+word:word;if(ctx.measureText(test).width<=maxWidth)line=test;else{if(line)lines.push(line);line=word}}if(line)lines.push(line);return lines}
-function drawRoleBand(ctx,W,H,position="top"){const bh=82;const isSpeaker=badgeType==="speaker";ctx.fillStyle=isSpeaker?"#1d4ed8":"#b91c1c";const label=isSpeaker?"ΕΙΣΗΓΗΤΗΣ":"ΟΜΑΔΑ ΔΙΟΡΓΑΝΩΣΗΣ";if(position==="top"){ctx.fillRect(0,0,W,bh);ctx.fillStyle="#fff";ctx.textAlign="center";ctx.textBaseline="middle";ctx.font="800 31px Arial, sans-serif";ctx.fillText(label,W/2,bh/2)}else{ctx.fillRect(0,H-bh,W,bh);ctx.fillStyle="#fff";ctx.textAlign="center";ctx.textBaseline="middle";ctx.font="800 31px Arial, sans-serif";ctx.fillText(label,W/2,H-bh/2)}}
+function drawRoleBand(ctx,W,H,position="top"){const bh=82;const isSpeaker=badgeType==="speaker";ctx.fillStyle=isSpeaker?"#1d4ed8":"#b91c1c";const label=isSpeaker?"ΕΙΣΗΓΗΤΗΣ":"ΔΙΟΡΓΑΝΩΤΕΣ";if(position==="top"){ctx.fillRect(0,0,W,bh);ctx.fillStyle="#fff";ctx.textAlign="center";ctx.textBaseline="middle";ctx.font="800 31px Arial, sans-serif";ctx.fillText(label,W/2,bh/2)}else{ctx.fillRect(0,H-bh,W,bh);ctx.fillStyle="#fff";ctx.textAlign="center";ctx.textBaseline="middle";ctx.font="800 31px Arial, sans-serif";ctx.fillText(label,W/2,H-bh/2)}}
 async function drawWalkinFront(canvas,person){
   const ctx=canvas.getContext("2d"),
         W=canvas.width,
@@ -391,7 +391,27 @@ async function drawWalkinBack(canvas,person){
     535
   );
 }
-  async function drawBack(canvas,person){if(badgeType==="walkin"){
+  async function drawBack(canvas,person){if(badgeType==="staff"){
+  const ctx=canvas.getContext("2d");
+
+  ctx.clearRect(
+    0,
+    0,
+    canvas.width,
+    canvas.height
+  );
+
+  ctx.fillStyle="#fff";
+
+  ctx.fillRect(
+    0,
+    0,
+    canvas.width,
+    canvas.height
+  );
+
+  return;
+} if(badgeType==="walkin"){
   await drawWalkinBack(
     canvas,
     person
